@@ -1,2 +1,2 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<h1>Welcome to Card-O-Rama</h1>
+<a href="http://localhost:8082/oauth2/authorization/google">Login With Google</a>
