@@ -1,4 +1,4 @@
-package edu.oswego.cs.CardORamaBackend.model;
+package edu.oswego.cs.CardORamaBackend.model.user;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

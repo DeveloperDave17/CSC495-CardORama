@@ -8,8 +8,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import edu.oswego.cs.CardORamaBackend.model.User;
-import edu.oswego.cs.CardORamaBackend.model.UserRepository;
+import edu.oswego.cs.CardORamaBackend.model.user.User;
+import edu.oswego.cs.CardORamaBackend.model.user.UserRepository;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
