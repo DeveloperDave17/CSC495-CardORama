@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface FlashcardRepository extends CrudRepository<Flashcard, Long> {
 
-   List<Flashcard> findBySetIDByPosition(long setID);
+   List<Flashcard> findBySetIDOrderByPosition(long setID);
 
    @Modifying
    @Query("update Flashcard f set f.term = :term where f.flashcardID = :flashcardID")
