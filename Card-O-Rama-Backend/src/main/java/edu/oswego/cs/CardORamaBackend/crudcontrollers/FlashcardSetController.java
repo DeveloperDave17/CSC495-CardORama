@@ -57,7 +57,7 @@ public class FlashcardSetController {
    @PostMapping("/remove/{setID}")
    public void removeFlashcardSet(@AuthenticationPrincipal OAuth2User principal, HttpServletResponse response, @PathVariable(name = "setID") Long setID) {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-      if (auth.isAuthenticated()) {
+      if (auth.isAuthenticated() && DBUtils.userHasWriteAccessForFlashcardSet(principal.getAttribute("email"), setID)) {
          this.flashcardSetRepository.deleteById(setID);
          response.setStatus(HttpServletResponse.SC_OK);
       } else {
