@@ -80,7 +80,7 @@ public class FlashcardSetController {
    public void updateFlashcardSetPrivacy(@AuthenticationPrincipal OAuth2User principal, HttpServletResponse response, @PathVariable(name = "setID") Long setID, @PathVariable(name = "privacy") FlashcardSetPrivacy flashcardSetPrivacy) {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       if (auth.isAuthenticated() && DBUtils.userHasWriteAccessForFlashcardSet(principal.getAttribute("email"), setID)) {
-         this.flashcardSetRepository.updateSetPrivacy(setID, flashcardSetPrivacy);
+         this.flashcardSetRepository.updatePrivacy(setID, flashcardSetPrivacy);
          response.setStatus(HttpServletResponse.SC_OK);
       } else {
          response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -91,7 +91,7 @@ public class FlashcardSetController {
    public void updateFlashcardSetColor(@AuthenticationPrincipal OAuth2User principal, HttpServletResponse response, @PathVariable(name = "setID") Long setID, @PathVariable(name = "color") String color) {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       if (auth.isAuthenticated() && DBUtils.userHasWriteAccessForFlashcardSet(principal.getAttribute("email"), setID)) {
-         this.flashcardSetRepository.updateSetColor(setID, color);
+         this.flashcardSetRepository.updateColor(setID, color);
          response.setStatus(HttpServletResponse.SC_OK);
       } else {
          response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -102,7 +102,7 @@ public class FlashcardSetController {
    public void updateFlashcardSetPriority(@AuthenticationPrincipal OAuth2User principal, HttpServletResponse response, @PathVariable(name = "setID") Long setID, @PathVariable(name = "priority") int priority) {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       if (auth.isAuthenticated() && DBUtils.userHasWriteAccessForFlashcardSet(principal.getAttribute("email"), setID)) {
-         this.flashcardSetRepository.updateSetPriority(setID, priority);
+         this.flashcardSetRepository.updatePriority(setID, priority);
          response.setStatus(HttpServletResponse.SC_OK);
       } else {
          response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
