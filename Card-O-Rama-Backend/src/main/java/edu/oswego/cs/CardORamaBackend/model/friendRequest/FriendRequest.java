@@ -1,6 +1,8 @@
 package edu.oswego.cs.CardORamaBackend.model.friendRequest;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
@@ -14,6 +16,9 @@ public class FriendRequest {
    private String email;
    @Id
    private String friendEmail;
+   @Enumerated(EnumType.STRING)
+   private FriendRequestStatus friendRequestStatus;
+   private int requestCount;
    
    public FriendRequest() {}
 
@@ -36,6 +41,22 @@ public class FriendRequest {
 
    public void setFriendEmail(String friendEmail) {
       this.friendEmail = friendEmail;
+   }
+
+   public FriendRequestStatus getFriendRequestStatus() {
+      return friendRequestStatus;
+   }
+
+   public void setFriendRequestStatus(FriendRequestStatus friendRequestStatus) {
+      this.friendRequestStatus = friendRequestStatus;
+   }
+
+   public int getRequestCount() {
+      return requestCount;
+   }
+
+   public void setRequestCount(int requestCount) {
+      this.requestCount = requestCount;
    }
 }
 
