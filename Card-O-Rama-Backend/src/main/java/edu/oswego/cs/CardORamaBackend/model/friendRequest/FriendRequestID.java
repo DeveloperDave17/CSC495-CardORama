@@ -7,6 +7,13 @@ public class FriendRequestID implements Serializable {
    private String email;
    private String friendEmail;
 
+   public FriendRequestID() {}
+
+   public FriendRequestID(String email, String friendEmail) {
+      this.email = email;
+      this.friendEmail = friendEmail;
+   }
+
    public String getEmail() {
       return email;
    }
