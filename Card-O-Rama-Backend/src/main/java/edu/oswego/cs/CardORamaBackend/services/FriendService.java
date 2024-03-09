@@ -26,16 +26,20 @@ public class FriendService {
 
    @Transactional
    public void createFriendship(String email1, String email2) {
-      // Add users to each others friend requests.
-      Friend friend1 = new Friend(email1, email2);
-      this.friendRepository.save(friend1);
-      Friend friend2 = new Friend(email2, email1);
-      this.friendRepository.save(friend2);
-      // Remove pending friend requests for both users.
-      FriendRequestID possibleFriendRequest1 = new FriendRequestID(email1, email2);
-      this.friendRequestRepository.deleteById(possibleFriendRequest1);
-      FriendRequestID possibleFriendRequest2 = new FriendRequestID(email2, email1);
-      this.friendRequestRepository.deleteById(possibleFriendRequest2);
+      // Confirm email1 actually received a friend request from email2
+      Optional<FriendRequest> friendRequest = this.friendRequestRepository.findById(new FriendRequestID(email2, email1));
+      if (friendRequest.isPresent()) {
+         // Add users to each others friend requests.
+         Friend friend1 = new Friend(email1, email2);
+         this.friendRepository.save(friend1);
+         Friend friend2 = new Friend(email2, email1);
+         this.friendRepository.save(friend2);
+         // Remove pending friend requests for both users.
+         FriendRequestID possibleFriendRequest1 = new FriendRequestID(email1, email2);
+         this.friendRequestRepository.deleteById(possibleFriendRequest1);
+         FriendRequestID possibleFriendRequest2 = new FriendRequestID(email2, email1);
+         this.friendRequestRepository.deleteById(possibleFriendRequest2);
+      }
    }
 
    @Transactional
