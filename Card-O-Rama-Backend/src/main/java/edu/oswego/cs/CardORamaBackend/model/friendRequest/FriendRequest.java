@@ -25,6 +25,8 @@ public class FriendRequest {
    public FriendRequest(String email, String friendEmail) {
       this.email = email;
       this.friendEmail = friendEmail;
+      this.friendRequestStatus = FriendRequestStatus.PENDING;
+      this.requestCount = 1;
    }
 
    public String getEmail() {
