@@ -8,6 +8,6 @@ import org.springframework.data.repository.query.Param;
 public interface FriendRequestRepository extends CrudRepository<FriendRequest, FriendRequestID> {
    
    @Modifying
-   @Query("update FriendRequest fr set fr.friendRequestStatus = DECLINED where fr.email = :email and fr.friendEmail = :friendEmail")
-   void declineFriendRequest(@Param(value = "email") String email, @Param(value = "friendEmail") String friendEmail);
+   @Query("update FriendRequest fr set fr.friendRequestStatus = DECLINED where fr.email = :senderEmail and fr.friendEmail = :email")
+   void declineFriendRequest(@Param(value = "email") String email, @Param(value = "senderEmail") String senderEmail);
 }
