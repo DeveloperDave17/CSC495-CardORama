@@ -1,6 +1,8 @@
 <script>
    import { fetchGet } from "$lib/network-utils";
    import { GlobalReferences } from "$lib/globals";
+
+   let globalReferences = new GlobalReferences();
 </script>
 
 <div id="homepage-content">
@@ -12,7 +14,7 @@
       <img id="homepage-img" src="/images/book-open-page-variant.svg" alt="open book">
    </div> 
    <div id="study-set-link-container">
-      <a id="study-set-link">My Flashcard Sets</a>
+      <a id="study-set-link" href="{globalReferences.indexlocation}/home/flashcards">My Flashcard Sets</a>
    </div> 
 </div>
 

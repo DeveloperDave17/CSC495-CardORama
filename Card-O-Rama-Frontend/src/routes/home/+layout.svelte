@@ -1,4 +1,8 @@
 <script>
+   import { GlobalReferences } from "$lib/globals";
+
+   let globalReferences = new GlobalReferences();
+
    let innerWidth = 0;
    let menuDisplay = "none";
    let menuDisplayImage = "/images/menu.svg";
@@ -19,9 +23,10 @@
 <div id="nav-bar">
    <div id="left-nav-bar">
       <img id="nav-menu" src={menuDisplayImage} alt="selection menu" on:click={toggleHamburgerMenu}/>
-      <a class="nav-text-links">Edit</a>
+      <a class="nav-text-links" href="{globalReferences.indexlocation}/home/flashcards">Edit</a>
       <a class="nav-text-links">Guides</a>
       <a class="nav-text-links">Study</a>
+      <a class="nav-text-links" href="{globalReferences.indexlocation}/home">Home</a>
    </div>
    <div id="right-nav-bar">
       <img id="nav-friends" src="/images/account-multiple.svg" alt="friends">
@@ -30,10 +35,11 @@
 </div>
 {#if innerWidth < 769}
    <div id="hamburger-selection-menu" style="display: {menuDisplay}">
-      <a>Edit</a>
+      <a href="{globalReferences.indexlocation}/home/flashcards">Edit</a>
       <a>Guides</a>
       <a>Study</a>
       <a>Friends</a>
+      <a href="{globalReferences.indexlocation}/home">Home</a>
    </div>
 {/if}
 
