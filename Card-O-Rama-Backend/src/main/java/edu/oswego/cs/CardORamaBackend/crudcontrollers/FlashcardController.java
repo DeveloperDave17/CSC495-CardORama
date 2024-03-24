@@ -1,6 +1,7 @@
 package edu.oswego.cs.CardORamaBackend.crudcontrollers;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,22 +66,24 @@ public class FlashcardController {
       }
    }
 
-   @PostMapping("/updateTerm/{flashcardID}/{term}")
-   public ResponseEntity<Boolean> updateFlashcardTerm(@AuthenticationPrincipal OAuth2User principal, @PathVariable(name = "flashcardID") Long flashcardID, @PathVariable(name = "term") String term) {
+   @PostMapping(value = {"/updateTerm/{flashcardID}/{term}", "/updateTerm/{flashcardID}/"})
+   public ResponseEntity<Boolean> updateFlashcardTerm(@AuthenticationPrincipal OAuth2User principal, @PathVariable(name = "flashcardID") Long flashcardID, @PathVariable(name = "term") Optional<String> term) {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       if (auth.isAuthenticated() && this.flashcardRepository.checkIfUserOwnsFlashcard(flashcardID, principal.getAttribute("email"))) {
-         this.flashcardRepository.updateTerm(flashcardID, term);
+         String termUpdate = term.isPresent() ? term.get() : "";
+         this.flashcardRepository.updateTerm(flashcardID, termUpdate);
          return ResponseEntity.ok().body(true);
       } else {
          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
       }
    }
 
-   @PostMapping("/updateDefinition/{flashcardID}/{definition}")
-   public ResponseEntity<Boolean> updateFlashcardDefintion(@AuthenticationPrincipal OAuth2User principal, @PathVariable(name = "flashcardID") Long flashcardID, @PathVariable(name = "definition") String definition) {
+   @PostMapping(value = {"/updateDefinition/{flashcardID}/{definition}", "/updateDefinition/{flashcardID}/"})
+   public ResponseEntity<Boolean> updateFlashcardDefintion(@AuthenticationPrincipal OAuth2User principal, @PathVariable(name = "flashcardID") Long flashcardID, @PathVariable(name = "definition") Optional<String> definition) {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       if (auth.isAuthenticated() && this.flashcardRepository.checkIfUserOwnsFlashcard(flashcardID, principal.getAttribute("email"))) {
-         this.flashcardRepository.updateDefinition(flashcardID, definition);
+         String definitionUpdate = definition.isPresent() ? definition.get() : "";
+         this.flashcardRepository.updateDefinition(flashcardID, definitionUpdate);
          return ResponseEntity.ok().body(true); 
       } else {
          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
