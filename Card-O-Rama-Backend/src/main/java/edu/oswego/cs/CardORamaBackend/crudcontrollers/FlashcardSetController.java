@@ -10,11 +10,13 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import edu.oswego.cs.CardORamaBackend.model.flashcardset.FlashcardSet;
 import edu.oswego.cs.CardORamaBackend.model.flashcardset.FlashcardSetPrivacy;
@@ -22,7 +24,8 @@ import edu.oswego.cs.CardORamaBackend.model.flashcardset.FlashcardSetRepository;
 import edu.oswego.cs.CardORamaBackend.utils.DBUtils;
 import jakarta.servlet.http.HttpServletResponse;
 
-@Controller
+@CrossOrigin(origins = "http://localhost:8080")
+@RestController
 @RequestMapping("/FlashcardSet")
 public class FlashcardSetController {
    
@@ -42,70 +45,70 @@ public class FlashcardSetController {
    }
 
    @PostMapping("/create")
-   public void createFlashcardSet(@AuthenticationPrincipal OAuth2User principal, HttpServletResponse response, @RequestBody FlashcardSet flashcardSet) {
+   public ResponseEntity<FlashcardSet> createFlashcardSet(@AuthenticationPrincipal OAuth2User principal, @RequestBody FlashcardSet flashcardSet) {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       if (auth.isAuthenticated()) {
          String email = principal.getAttribute("email");
          flashcardSet.setEmail(email);
-         this.flashcardSetRepository.save(flashcardSet);
-         response.setStatus(HttpServletResponse.SC_OK);
+         flashcardSet = this.flashcardSetRepository.save(flashcardSet);
+         return ResponseEntity.ok(flashcardSet);
       } else {
-         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
       }
    }
 
    @PostMapping("/remove/{setID}")
-   public void removeFlashcardSet(@AuthenticationPrincipal OAuth2User principal, HttpServletResponse response, @PathVariable(name = "setID") Long setID) {
+   public ResponseEntity<Boolean> removeFlashcardSet(@AuthenticationPrincipal OAuth2User principal, @PathVariable(name = "setID") Long setID) {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       if (auth.isAuthenticated() && DBUtils.userHasWriteAccessForFlashcardSet(principal.getAttribute("email"), setID)) {
          this.flashcardSetRepository.deleteById(setID);
-         response.setStatus(HttpServletResponse.SC_OK);
+         return ResponseEntity.ok(true);
       } else {
-         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
       }
    }
 
    @PostMapping("/updateName/{setID}/{setName}")
-   public void updateFlashcardSetName(@AuthenticationPrincipal OAuth2User principal, HttpServletResponse response, @PathVariable(name = "setID") Long setID, @PathVariable(name = "setName") String setName) {
+   public ResponseEntity<Boolean> updateFlashcardSetName(@AuthenticationPrincipal OAuth2User principal, @PathVariable(name = "setID") Long setID, @PathVariable(name = "setName") String setName) {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       if (auth.isAuthenticated() && DBUtils.userHasWriteAccessForFlashcardSet(principal.getAttribute("email"), setID)) {
          this.flashcardSetRepository.updateSetName(setID, setName);
-         response.setStatus(HttpServletResponse.SC_OK);
+         return ResponseEntity.ok(true);
       } else {
-         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
       }
    }
 
    @PostMapping("/updatePrivacy/{setID}/{privacy}")
-   public void updateFlashcardSetPrivacy(@AuthenticationPrincipal OAuth2User principal, HttpServletResponse response, @PathVariable(name = "setID") Long setID, @PathVariable(name = "privacy") FlashcardSetPrivacy flashcardSetPrivacy) {
+   public ResponseEntity<Boolean> updateFlashcardSetPrivacy(@AuthenticationPrincipal OAuth2User principal, @PathVariable(name = "setID") Long setID, @PathVariable(name = "privacy") FlashcardSetPrivacy flashcardSetPrivacy) {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       if (auth.isAuthenticated() && DBUtils.userHasWriteAccessForFlashcardSet(principal.getAttribute("email"), setID)) {
          this.flashcardSetRepository.updatePrivacy(setID, flashcardSetPrivacy);
-         response.setStatus(HttpServletResponse.SC_OK);
+         return ResponseEntity.ok(true);
       } else {
-         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
       }
    }
 
    @PostMapping("/updateColor/{setID}/{color}")
-   public void updateFlashcardSetColor(@AuthenticationPrincipal OAuth2User principal, HttpServletResponse response, @PathVariable(name = "setID") Long setID, @PathVariable(name = "color") String color) {
+   public ResponseEntity<Boolean> updateFlashcardSetColor(@AuthenticationPrincipal OAuth2User principal, @PathVariable(name = "setID") Long setID, @PathVariable(name = "color") String color) {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       if (auth.isAuthenticated() && DBUtils.userHasWriteAccessForFlashcardSet(principal.getAttribute("email"), setID)) {
          this.flashcardSetRepository.updateColor(setID, color);
-         response.setStatus(HttpServletResponse.SC_OK);
+         return ResponseEntity.ok(true);
       } else {
-         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
       }
    }
 
    @PostMapping("/updatePriority/{setID}/{priority}")
-   public void updateFlashcardSetPriority(@AuthenticationPrincipal OAuth2User principal, HttpServletResponse response, @PathVariable(name = "setID") Long setID, @PathVariable(name = "priority") int priority) {
+   public ResponseEntity<Boolean> updateFlashcardSetPriority(@AuthenticationPrincipal OAuth2User principal, @PathVariable(name = "setID") Long setID, @PathVariable(name = "priority") int priority) {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       if (auth.isAuthenticated() && DBUtils.userHasWriteAccessForFlashcardSet(principal.getAttribute("email"), setID)) {
          this.flashcardSetRepository.updatePriority(setID, priority);
-         response.setStatus(HttpServletResponse.SC_OK);
+         return ResponseEntity.ok(true);
       } else {
-         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
       }
    }
 }
