@@ -81,22 +81,24 @@ public class FlashcardSetController {
       }
    }
 
-   @PostMapping("/updatePrivacy/{setID}/{privacy}")
-   public ResponseEntity<Boolean> updateFlashcardSetPrivacy(@AuthenticationPrincipal OAuth2User principal, @PathVariable(name = "setID") Long setID, @PathVariable(name = "privacy") FlashcardSetPrivacy flashcardSetPrivacy) {
+   @PostMapping(value = {"/updatePrivacy/{setID}/{privacy}", "/updatePrivacy/{setID}/"})
+   public ResponseEntity<Boolean> updateFlashcardSetPrivacy(@AuthenticationPrincipal OAuth2User principal, @PathVariable(name = "setID") Long setID, @PathVariable(name = "privacy") Optional<FlashcardSetPrivacy> flashcardSetPrivacy) {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       if (auth.isAuthenticated() && DBUtils.userHasWriteAccessForFlashcardSet(principal.getAttribute("email"), setID)) {
-         this.flashcardSetRepository.updatePrivacy(setID, flashcardSetPrivacy);
+         FlashcardSetPrivacy flashcardSetPrivacyUpdate = flashcardSetPrivacy.isPresent() ? flashcardSetPrivacy.get() : FlashcardSetPrivacy.PRIVATE;
+         this.flashcardSetRepository.updatePrivacy(setID, flashcardSetPrivacyUpdate);
          return ResponseEntity.ok(true);
       } else {
          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
       }
    }
 
-   @PostMapping("/updateColor/{setID}/{color}")
-   public ResponseEntity<Boolean> updateFlashcardSetColor(@AuthenticationPrincipal OAuth2User principal, @PathVariable(name = "setID") Long setID, @PathVariable(name = "color") String color) {
+   @PostMapping(value = {"/updateColor/{setID}/{color}", "/updateColor/{setID}/"})
+   public ResponseEntity<Boolean> updateFlashcardSetColor(@AuthenticationPrincipal OAuth2User principal, @PathVariable(name = "setID") Long setID, @PathVariable(name = "color") Optional<String> color) {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       if (auth.isAuthenticated() && DBUtils.userHasWriteAccessForFlashcardSet(principal.getAttribute("email"), setID)) {
-         this.flashcardSetRepository.updateColor(setID, color);
+         String colorUpdate = color.isPresent() ? color.get() : "#FFFFFF";
+         this.flashcardSetRepository.updateColor(setID, colorUpdate);
          return ResponseEntity.ok(true);
       } else {
          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
