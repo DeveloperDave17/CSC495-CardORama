@@ -2,6 +2,7 @@ package edu.oswego.cs.CardORamaBackend.model.flashcard;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -9,7 +10,7 @@ import jakarta.persistence.Table;
 @Table(name = "Flashcards")
 public class Flashcard {
    
-   @Id @GeneratedValue
+   @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
    private Long flashcardID;
    private Long setID;
    private String term;
