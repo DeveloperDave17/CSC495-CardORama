@@ -1,6 +1,7 @@
 package edu.oswego.cs.CardORamaBackend.crudcontrollers;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -68,11 +69,12 @@ public class FlashcardSetController {
       }
    }
 
-   @PostMapping("/updateName/{setID}/{setName}")
-   public ResponseEntity<Boolean> updateFlashcardSetName(@AuthenticationPrincipal OAuth2User principal, @PathVariable(name = "setID") Long setID, @PathVariable(name = "setName") String setName) {
+   @PostMapping(value = {"/updateName/{setID}/{setName}", "/updateName/{setID}/"})
+   public ResponseEntity<Boolean> updateFlashcardSetName(@AuthenticationPrincipal OAuth2User principal, @PathVariable(name = "setID") Long setID, @PathVariable(name = "setName") Optional<String> setName) {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       if (auth.isAuthenticated() && DBUtils.userHasWriteAccessForFlashcardSet(principal.getAttribute("email"), setID)) {
-         this.flashcardSetRepository.updateSetName(setID, setName);
+         String setNameUpdate = setName.isPresent() ? setName.get() : "Flashcard Set";
+         this.flashcardSetRepository.updateSetName(setID, setNameUpdate);
          return ResponseEntity.ok(true);
       } else {
          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
