@@ -5,14 +5,25 @@
    
    let globals = new GlobalReferences();
    let flashcardSets = [];
-   let currentFlashcardSet = {setName : ""};
+   let currentFlashcardSet = {setName : "", color : "FFFFFF", privacy : "FRIENDS"};
    let flashcardSetListDisplayStatus = "none";
    let flashcards = [];
+   $: flashcardSetLength = flashcardSets.length;
+   $: flashcardColors = "#" + currentFlashcardSet.color;
 
-   async function getFlashcardSets() {
-      let flashcardSetsResponse = fetchGet(globals.backendBasePath + "/FlashcardSet/getAll");
-      flashcardSets = await flashcardSetsResponse.json();
-      currentFlashcardSet = flashcardSets[0];
+   function getFlashcards(flashcardSetID) {
+      fetch(globals.backendBasePath + `/Flashcard/getAll/${flashcardSetID}`, {
+            mode: "same-origin",
+            method: "get",
+            credentials: "include"
+         }).then((response) => {
+            if (!response.ok) {
+                  window.location.href = globalReferences.indexlocation;
+               }
+            return response.json();
+         }).then((data) => {
+            flashcards = data;
+         });
    }
 
    function toggleFlashcardSetList() {
@@ -48,7 +59,27 @@
    }
 
    function createNewFlashcardSet() {
-
+      fetch(globals.backendBasePath + "/FlashcardSet/create", {
+               method: "post",
+               headers: {
+                     "Content-Type" : "application/json",
+               },
+               credentials: "include",
+               body: JSON.stringify({
+                  setName: `Flashcard Set ${flashcardSetLength}`,
+                  privacy: "PRIVATE",
+                  color: "#FFFFFF",
+                  priority: `${flashcardSetLength}`
+               })
+            }).then((response) => {
+               if (!response.ok) {
+                  window.location.href = globalReferences.indexlocation;
+               }
+               return response.json();
+            }).then((data) => {
+               flashcardSets.push(data);
+               flashcardSets = flashcardSets;
+            });
    }
 
    onMount(async () => {
@@ -100,38 +131,163 @@
       }
 
    });
+
+   function changeFlashcardSet(flashcardSet) {
+      currentFlashcardSet = flashcardSet;
+      getFlashcards(flashcardSet.setID);
+   }
+
+   function updateFlashcardTerm(flashcard) {
+      let flashcardTerm = flashcard.term;
+      let encodedFlashcardTerm = encodeURIComponent(flashcardTerm);
+      let globals = new GlobalReferences();
+      fetch(globals.backendBasePath + `/Flashcard/updateTerm/${flashcard.flashcardID}/${encodedFlashcardTerm}`, {
+               method: "post",
+               credentials: "include"
+            }).then((response) => {
+               if (!response.ok) {
+                  window.location.href = globalReferences.indexlocation;
+               }
+            });
+   }
+
+   function updateFlashcardDefinition(flashcard) {
+      let setDefinition = flashcard.definition;
+      let encodedDefintion = encodeURIComponent(setDefinition);
+      let globals = new GlobalReferences();
+      fetch(globals.backendBasePath + `/Flashcard/updateDefinition/${flashcard.flashcardID}/${encodedDefintion}`, {
+               method: "post",
+               credentials: "include"
+            }).then((response) => {
+               if (!response.ok) {
+                  window.location.href = globalReferences.indexlocation;
+               }
+            });
+   }
+
+   function updateFlashcardSetName(flashcardSet) {
+      let setName = flashcardSet.setName;
+      let encodedName = encodeURIComponent(setName);
+      let globals = new GlobalReferences();
+      fetch(globals.backendBasePath + `/FlashcardSet/updateName/${flashcardSet.setID}/${encodedName}`, {
+               method: "post",
+               credentials: "include"
+            }).then((response) => {
+               if (!response.ok) {
+                  window.location.href = globalReferences.indexlocation;
+               }
+            });
+      // Ensures the flashcard sets update for the user.
+      flashcardSets = flashcardSets;
+   }
+
+   function updateFlashcardSetColor(flashcardSet) {
+      let globals = new GlobalReferences();
+      let path = `/FlashcardSet/updateColor/${flashcardSet.setID}/${flashcardSet.color}`; 
+      fetch(globals.backendBasePath + path, {
+               method: "post",
+               credentials: "include"
+            }).then((response) => {
+               if (!response.ok) {
+                  window.location.href = globalReferences.indexlocation;
+               }
+            });
+   }
+
+   function updateFlashcardSetPrivacy(flashcardSet) {
+      let globals = new GlobalReferences();
+      fetch(globals.backendBasePath + `/FlashcardSet/updatePrivacy/${flashcardSet.setID}/${flashcardSet.privacy}`, {
+               method: "post",
+               credentials: "include"
+            }).then((response) => {
+               if (!response.ok) {
+                  window.location.href = globalReferences.indexlocation;
+               }
+            });
+   }
+
+   function removeFlashcard(flashcard) {
+      let globals = new GlobalReferences();
+      fetch(globals.backendBasePath + `/Flashcard/remove/${flashcard.flashcardID}`, {
+               method: "post",
+               credentials: "include"
+            }).then((response) => {
+               if (!response.ok) {
+                  window.location.href = globalReferences.indexlocation;
+               }
+            });
+      let index = flashcards.indexOf(flashcard);
+      flashcards.splice(index, 1);
+      // update flascards for the user
+      flashcards = flashcards;
+   }
+
+   function removeFlashcardSet(flashcardSet) {
+      let globals = new GlobalReferences();
+      fetch(globals.backendBasePath + `/FlashcardSet/remove/${flashcardSet.setID}`, {
+               method: "post",
+               credentials: "include"
+            }).then((response) => {
+               if (!response.ok) {
+                  window.location.href = globalReferences.indexlocation;
+               }
+            });
+      let index = flashcardSets.indexOf(flashcardSet);
+      flashcardSets.splice(index, 1);
+      flashcardSets = flashcardSets;
+   }
+
+   // handle flashcard movement
+   let mouseYCoord = null;
+   let distanceWithinBounds = null;
+   let flashcardBeingDragged = null;
+   let flashcardBeingDraggedIndex = null;
+   let flashcardBeingHoveredIndex = null;
+
+   $ : {
+      if (flashcardBeingDragged != null && flashcardBeingDraggedIndex != null && flashcardBeingDraggedIndex != flashcardBeingHoveredIndex) {
+         // swap
+         [ flashcards[flashcardBeingHoveredIndex], flashcards[flashcardBeingDraggedIndex] ] = [ flashcards[flashcardBeingDraggedIndex], flashcards[flashcardBeingHoveredIndex] ];
+         // calibrate
+         flashcardBeingDraggedIndex = flashcardBeingHoveredIndex;
+      }
+   }
 </script>
 
 <div id="flashcard-set-page">
    <button id="flashcard-set-button" on:click={toggleFlashcardSetList}>
       <span>{currentFlashcardSet.setName}</span>
-      <span></span>
    </button>
    <ul id="flashcard-set-list" style="display: {flashcardSetListDisplayStatus};">
       {#each flashcardSets as flashcardSet}
-         <li>{flashcardSet.setName}</li>
+         <div class="flashcard-set-list-ele">
+            <li on:click={() => changeFlashcardSet(flashcardSet)}>{flashcardSet.setName}</li>
+            {#if flashcardSet != currentFlashcardSet}
+               <img class="flashcardset-trashcan" src="/images/trash-can-outline.svg" alt="delete flashcard set button" on:click={() => {removeFlashcardSet(flashcardSet)}}>
+            {/if}
+         </div>
       {/each}
-      <li id="new-flashcard-set">+ New Flashcard Set</li>
+      <li id="new-flashcard-set" on:click={createNewFlashcardSet}>+ New Flashcard Set</li>
    </ul>
 
    <div class="flashcard-set-values">
       <label for="set-name">Flashcard Set Name</label>
-      <input type="text" id="set-name" name="set-name" value={currentFlashcardSet.setName}>
+      <input type="text" id="set-name" name="set-name" bind:value={currentFlashcardSet.setName} on:change={() => updateFlashcardSetName(currentFlashcardSet)}>
    </div>
    <div class="flashcard-set-values">
       <label for="set-color">Flashcard Set Color</label>
-      <select id="set-color" name="set-color" value={currentFlashcardSet.color}>
-         <option value="#FFFFFF">White</option>
-         <option value="#C7EEFF">Light Blue</option>
-         <option value="#CFFFC7">Light Green</option>
-         <option value="#FEFFC0">Yellow</option>
-         <option value="#FFC5C5">Light Red</option>
-         <option value="#FFC5F6">Purple</option>
+      <select id="set-color" name="set-color" bind:value={currentFlashcardSet.color} on:change={() => updateFlashcardSetColor(currentFlashcardSet)}>
+         <option value="FFFFFF">White</option>
+         <option value="C7EEFF">Light Blue</option>
+         <option value="CFFFC7">Light Green</option>
+         <option value="FEFFC0">Yellow</option>
+         <option value="FFC5C5">Light Red</option>
+         <option value="FFC5F6">Purple</option>
       </select>
    </div>
    <div class="flashcard-set-values">
       <label for="set-privacy">Flashcard Set Privacy</label>
-      <select id="set-privacy" name="set-privacy" value={currentFlashcardSet.privacy}>
+      <select id="set-privacy" name="set-privacy" bind:value={currentFlashcardSet.privacy} on:change={() => updateFlashcardSetPrivacy(currentFlashcardSet)}>
          <option value="PRIVATE">Private</option>
          <option value="FRIENDS">Friends-Only</option>
          <option value="PUBLIC">Public</option>
@@ -139,14 +295,19 @@
    </div>
 
    <h1>Flashcards</h1>
+   <div class="flashcard-container">
    {#each flashcards as flashcard}
-      <div class="flashcard">
-         <label for="term{flashcard.flashcardID}">Term</label>
-         <input class="term-inputs" type="text" id="term{flashcard.flashcardID}" name="term{flashcard.flashcardID}" value={flashcard.term}>
+      <div draggable="true" class="flashcard" style="background-color: {flashcardColors};">
+         <div class="flashcard-top">
+            <label for="term{flashcard.flashcardID}">Term</label>
+            <img class="flashcard-trashcan" src="/images/trash-can-outline.svg" alt="delete button" on:click={() => removeFlashcard(flashcard)}>
+         </div>
+         <input class="term-inputs" type="text" id="term{flashcard.flashcardID}" name="term{flashcard.flashcardID}" bind:value={flashcard.term} on:change={() => updateFlashcardTerm(flashcard)}>
          <label for="definition{flashcard.flashcardID}">Definition</label>
-         <textarea class="definitions" id="definition{flashcard.flashcardID}" name="definition{flashcard.flashcardID}" value={flashcard.definition} rows="4"/>
+         <textarea class="definitions" id="definition{flashcard.flashcardID}" name="definition{flashcard.flashcardID}" bind:value={flashcard.definition} on:change={() => updateFlashcardDefinition(flashcard)} rows="4"/>
       </div>
    {/each}
+   </div>
    <button id="new-flashcard-button" on:click={createNewFlashcard}>Create New Flashcard</button>
 </div>
 
@@ -170,6 +331,7 @@
       border-color: #BBBBBB;
       border-width: 1px;
       font-weight: 500;
+      overflow: clip;
    }
 
    #flashcard-set-list {
@@ -182,15 +344,50 @@
       border-style: solid;
       border-width: 1px;
       padding-left: 0px;
+      overflow-y: scroll;
+      overflow-x: ellipsis;
    }
 
-   #flashcard-set-list > li {
+   #flashcard-set-list::-webkit-scrollbar {
+      width: 16px;
+      border-radius: 10px;
+   }
+
+   #flashcard-set-list::-webkit-scrollbar-track {
+      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+   }
+
+   #flashcard-set-list::-webkit-scrollbar-thumb {
+      background-color: var(--primary-bg-color);
+      border-radius: 10px;
+      outline: 1px solid black;
+   }
+
+   #flashcard-set-list > li, .flashcard-set-list-ele {
       list-style-type: none;
       padding: 0 15px 0 15px;
       margin: 0px;
       height: 40px;
       display: flex;
       align-items: center;
+   }
+
+   .flashcard-set-list-ele {
+      display: flex;
+      justify-content: space-between;
+   }
+
+   .flashcard-set-list-ele > li {
+      text-overflow: ellipsis;
+      overflow: clip;
+      height: 18px;
+      width: 250px;
+   }
+
+   .flashcardset-trashcan {
+      width: 25px;
+      height: 25px;
    }
 
    .flashcard-set-values {
@@ -228,6 +425,16 @@
 
    .term-inputs {
       margin-bottom: 20px; 
+   }
+
+   .flashcard-trashcan {
+      height: 25px;
+      width: 25px;
+   }
+
+   .flashcard-top {
+      display: flex;
+      justify-content: space-between;
    }
 
    .flashcard-set-values > input, .flashcard-set-values > select, .flashcard-set-values > select > option {
