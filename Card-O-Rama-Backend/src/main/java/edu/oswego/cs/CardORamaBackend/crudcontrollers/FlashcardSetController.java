@@ -97,7 +97,7 @@ public class FlashcardSetController {
    public ResponseEntity<Boolean> updateFlashcardSetColor(@AuthenticationPrincipal OAuth2User principal, @PathVariable(name = "setID") Long setID, @PathVariable(name = "color") Optional<String> color) {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       if (auth.isAuthenticated() && DBUtils.userHasWriteAccessForFlashcardSet(principal.getAttribute("email"), setID)) {
-         String colorUpdate = color.isPresent() ? color.get() : "#FFFFFF";
+         String colorUpdate = color.isPresent() ? color.get() : "FFFFFF";
          this.flashcardSetRepository.updateColor(setID, colorUpdate);
          return ResponseEntity.ok(true);
       } else {

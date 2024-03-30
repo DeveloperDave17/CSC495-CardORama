@@ -7,9 +7,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import jakarta.transaction.Transactional;
+
 public interface FriendRequestRepository extends CrudRepository<FriendRequest, FriendRequestID> {
    
    @Modifying
+   @Transactional
    @Query("update FriendRequest fr set fr.friendRequestStatus = DECLINED where fr.email = :senderEmail and fr.friendEmail = :email")
    void declineFriendRequest(@Param(value = "email") String email, @Param(value = "senderEmail") String senderEmail);
 

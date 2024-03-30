@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edu.oswego.cs.CardORamaBackend.model.flashcard.Flashcard;
 import edu.oswego.cs.CardORamaBackend.model.flashcard.FlashcardRepository;
+import edu.oswego.cs.CardORamaBackend.services.FlashcardService;
 import edu.oswego.cs.CardORamaBackend.utils.DBUtils;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -32,6 +33,9 @@ public class FlashcardController {
    
    @Autowired
    FlashcardRepository flashcardRepository;
+
+   @Autowired
+   FlashcardService flashcardService;
 
    @GetMapping("/getAll/{setID}")
    public ResponseEntity<List<Flashcard>> getFlashcard(@AuthenticationPrincipal OAuth2User principal, @PathVariable(name = "setID") long setID) {
@@ -90,11 +94,11 @@ public class FlashcardController {
       }
    }
 
-   @PostMapping("/updatePosition/{flashcardID}/{position}")
-   public ResponseEntity<Boolean> updateFlashcardPosition(@AuthenticationPrincipal OAuth2User principal, @PathVariable(name = "flashcardID") Long flashcardID, @PathVariable(name = "position") int position) {
+   @PostMapping("/updatePositions")
+   public ResponseEntity<Boolean> updateFlashcardPosition(@AuthenticationPrincipal OAuth2User principal, @RequestBody List<Long> flashcardIDs) {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-      if (auth.isAuthenticated() && this.flashcardRepository.checkIfUserOwnsFlashcard(flashcardID, principal.getAttribute("email"))) {
-         this.flashcardRepository.updatePosition(flashcardID, position);
+      if (auth.isAuthenticated() && !flashcardIDs.isEmpty() && this.flashcardRepository.checkIfUserOwnsFlashcard(flashcardIDs.get(0), principal.getAttribute("email"))) {
+         this.flashcardService.updatePositions(flashcardIDs);
          return ResponseEntity.ok().body(true);
       } else {
          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);

@@ -22,7 +22,7 @@ public class LoginController {
    public void loginRedirect(HttpServletResponse httpServletResponse, @AuthenticationPrincipal OAuth2User principal) {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       if (auth.isAuthenticated()) {
-         httpServletResponse.setHeader("Location", "http://localhost:5173/home");
+         httpServletResponse.setHeader("Location", "http://localhost:8080/home");
          httpServletResponse.setStatus(302);
          String email = principal.getAttribute("email");
          String name = principal.getAttribute("name");
