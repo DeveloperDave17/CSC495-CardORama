@@ -72,6 +72,10 @@
       align-items: center;
    }
 
+   #nav-bar a {
+      text-decoration: none;
+   }
+
    #nav-bar > div {
       margin: 18px;
    }

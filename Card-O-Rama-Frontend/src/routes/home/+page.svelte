@@ -76,6 +76,7 @@
       font-size: 28px;
       color: white;
       background-color: var(--primary-bg-color);
+      text-decoration: none;
    }
    
    @media screen and (min-width: 769px) {

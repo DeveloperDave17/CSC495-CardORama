@@ -2,6 +2,9 @@
    import { fetchGet } from "$lib/network-utils";
    import { GlobalReferences } from "$lib/globals";
    import { onMount } from "svelte";
+   import { overrideItemIdKeyNameBeforeInitialisingDndZones } from "svelte-dnd-action";
+   import { dndzone } from "svelte-dnd-action";
+   overrideItemIdKeyNameBeforeInitialisingDndZones("flashcardID");
    
    let globals = new GlobalReferences();
    let flashcardSets = [];
@@ -185,7 +188,7 @@
       let globals = new GlobalReferences();
       let path = `/FlashcardSet/updateColor/${flashcardSet.setID}/${flashcardSet.color}`; 
       fetch(globals.backendBasePath + path, {
-               method: "post",
+               method: "post", 
                credentials: "include"
             }).then((response) => {
                if (!response.ok) {
@@ -235,22 +238,32 @@
       let index = flashcardSets.indexOf(flashcardSet);
       flashcardSets.splice(index, 1);
       flashcardSets = flashcardSets;
+   } 
+
+   const handleFlashcardConsider = (event) => {
+      flashcards = event.detail.items;
    }
 
-   // handle flashcard movement
-   let mouseYCoord = null;
-   let distanceWithinBounds = null;
-   let flashcardBeingDragged = null;
-   let flashcardBeingDraggedIndex = null;
-   let flashcardBeingHoveredIndex = null;
+   const handleFlashcardFinalize = (event) => {
+      flashcards = event.detail.items;
+      sendNewPositions();
+   }
 
-   $ : {
-      if (flashcardBeingDragged != null && flashcardBeingDraggedIndex != null && flashcardBeingDraggedIndex != flashcardBeingHoveredIndex) {
-         // swap
-         [ flashcards[flashcardBeingHoveredIndex], flashcards[flashcardBeingDraggedIndex] ] = [ flashcards[flashcardBeingDraggedIndex], flashcards[flashcardBeingHoveredIndex] ];
-         // calibrate
-         flashcardBeingDraggedIndex = flashcardBeingHoveredIndex;
-      }
+   function sendNewPositions() {
+      let positions = flashcards.map((flashcard) => flashcard.flashcardID);
+      // send new positions
+      fetch(globals.backendBasePath + `/Flashcard/updatePositions`, {
+               method: "post",
+               headers: {
+                     "Content-Type" : "application/json",
+               },
+               credentials: "include",
+               body: JSON.stringify(positions)
+            }).then((response) => {
+               if (!response.ok) {
+                  window.location.href = globalReferences.indexlocation;
+               }
+            });
    }
 </script>
 
@@ -296,17 +309,23 @@
 
    <h1>Flashcards</h1>
    <div class="flashcard-container">
-   {#each flashcards as flashcard}
-      <div draggable="true" class="flashcard" style="background-color: {flashcardColors};">
-         <div class="flashcard-top">
-            <label for="term{flashcard.flashcardID}">Term</label>
-            <img class="flashcard-trashcan" src="/images/trash-can-outline.svg" alt="delete button" on:click={() => removeFlashcard(flashcard)}>
+      <section
+         use:dndzone="{{ items: flashcards, dropTargetStyle: {} }}"
+         on:consider="{handleFlashcardConsider}"
+         on:finalize="{handleFlashcardFinalize}"
+      >
+      {#each flashcards as flashcard(flashcard.flashcardID)}
+         <div class="flashcard" style="background-color: {flashcardColors};">
+            <div class="flashcard-top">
+               <label for="term{flashcard.flashcardID}">Term</label>
+               <img class="flashcard-trashcan" src="/images/trash-can-outline.svg" alt="delete button" on:click={() => removeFlashcard(flashcard)}>
+            </div>
+            <input class="term-inputs" type="text" id="term{flashcard.flashcardID}" name="term{flashcard.flashcardID}" bind:value={flashcard.term} on:change={() => updateFlashcardTerm(flashcard)}>
+            <label for="definition{flashcard.flashcardID}">Definition</label>
+            <textarea class="definitions" id="definition{flashcard.flashcardID}" name="definition{flashcard.flashcardID}" bind:value={flashcard.definition} on:change={() => updateFlashcardDefinition(flashcard)} rows="4"/>
          </div>
-         <input class="term-inputs" type="text" id="term{flashcard.flashcardID}" name="term{flashcard.flashcardID}" bind:value={flashcard.term} on:change={() => updateFlashcardTerm(flashcard)}>
-         <label for="definition{flashcard.flashcardID}">Definition</label>
-         <textarea class="definitions" id="definition{flashcard.flashcardID}" name="definition{flashcard.flashcardID}" bind:value={flashcard.definition} on:change={() => updateFlashcardDefinition(flashcard)} rows="4"/>
-      </div>
-   {/each}
+      {/each}
+      </section>
    </div>
    <button id="new-flashcard-button" on:click={createNewFlashcard}>Create New Flashcard</button>
 </div>
@@ -452,5 +471,9 @@
       color: white;
       font-size: 20px;
       border-radius: 10px;
+   }
+
+   .invisible {
+      opacity: 0;
    }
 </style>

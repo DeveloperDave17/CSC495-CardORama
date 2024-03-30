@@ -7,8 +7,8 @@ const globalReferences = new GlobalReferences();
  * @param {String} url The target url for the post request.
  * @param {String} jsonData A stringified json object.
  */
-export function fetchPost(url, jsonData) {
-   fetch(url, {
+export async function fetchPost(url, jsonData) {
+   await fetch(url, {
       mode: "cors",
       method: "post",
       headers: {
@@ -21,7 +21,7 @@ export function fetchPost(url, jsonData) {
          return response;
       } else {
          // User not authorized, redirect user to login.
-         window.location.href = globalReferences.indexlocation;
+         // window.location.href = globalReferences.indexlocation;
       }
    }).catch((error) => {
       console.log(`An error occurred when attempting to fetch a post request.\n${error}`);
@@ -31,11 +31,11 @@ export function fetchPost(url, jsonData) {
 /**
  * A function that sends a get request to a given url. The response is returned unless either the user is unauthorized or
  * an error occurs. If a user is unauthorized then they are redirected to the index page.
- * @param {String} url 
+ * @param {String} url
+ * @returns {Response | null} [response] 
  */
-export function fetchGet(url) {
-   fetch(url, {
-      mode: "cors",
+export async function fetchGet(url) {
+   await fetch(url, {
       method: "get",
       credentials: "include"
    }).then((response) => {
@@ -48,4 +48,5 @@ export function fetchGet(url) {
    }).catch((error) => {
       console.log(`An error occurred when attempting to fetch a get request.\n${error}`);
    })
+   return null;
 }
