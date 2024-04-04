@@ -32,4 +32,7 @@ public interface FlashcardRepository extends CrudRepository<Flashcard, Long> {
    @Transactional
    @Query("update Flashcard f set f.position = :position where f.flashcardID = :flashcardID")
    void updatePosition(@Param(value = "flashcardID") Long flashcardID, @Param(value = "position") int position);
+
+   @Transactional
+   Long deleteBySetID(Long setID);
 }
