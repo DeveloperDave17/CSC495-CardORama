@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.oswego.cs.CardORamaBackend.model.flashcard.FlashcardRepository;
 import edu.oswego.cs.CardORamaBackend.model.flashcardset.FlashcardSet;
 import edu.oswego.cs.CardORamaBackend.model.flashcardset.FlashcardSetPrivacy;
 import edu.oswego.cs.CardORamaBackend.model.flashcardset.FlashcardSetRepository;
@@ -32,6 +33,9 @@ public class FlashcardSetController {
    
    @Autowired
    FlashcardSetRepository flashcardSetRepository;
+
+   @Autowired
+   FlashcardRepository flashcardRepository;
 
    @GetMapping("/getAll")
    public ResponseEntity<List<FlashcardSet>> getFlashcardSets(@AuthenticationPrincipal OAuth2User principal) {
@@ -62,6 +66,7 @@ public class FlashcardSetController {
    public ResponseEntity<Boolean> removeFlashcardSet(@AuthenticationPrincipal OAuth2User principal, @PathVariable(name = "setID") Long setID) {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       if (auth.isAuthenticated() && DBUtils.userHasWriteAccessForFlashcardSet(principal.getAttribute("email"), setID)) {
+         this.flashcardRepository.deleteBySetID(setID);
          this.flashcardSetRepository.deleteById(setID);
          return ResponseEntity.ok(true);
       } else {
