@@ -5,7 +5,7 @@
       <p>
          Card-O-Rama is a flashcard based studying website that empowers connection making through a tf-idf similarity algorithm.
       </p>
-      <a href="http://localhost:8080/oauth2/authorization/google"><span>Login With&nbsp;</span><span id="g1">G</span><span id="o1">o</span><span id="o2">o</span><span id="g2">g</span><span id="l1">l</span><span id="e1">e</span></a>
+      <a href="http://localhost:8080/oauth2/authorization/google"><img id="sign-in-img" src="/images/web_light_sq_SI.svg" alt="Google Sign-in"></a>
       <img id="homepage-img" src="/images/book-open-page-variant.svg" alt="open book">
    </div>
    <div id="footer">Created By David Hennigan</div>
@@ -21,7 +21,7 @@
    #nav-bar {
       height: 100px;
       background-color: var(--primary-bg-color);
-      display: flex;
+      display: flex;    
    }
 
    h1 {
@@ -69,10 +69,7 @@
       height: 230px;
    }
 
-   a:link, a:visited {
-      color: var(--primary-bg-color);
-      border-color: var(--primary-bg-color);
-      border-style: solid;
+   a:link, a:visited, #sign-in-img {
       text-align: center;
       display: flex;
       justify-content: center;
@@ -122,7 +119,7 @@
          font-size: 32px;
       }
 
-      a {
+      a, #sign-in-img {
          font-size: 32px;
          width: 381px;
          height: 96px;
