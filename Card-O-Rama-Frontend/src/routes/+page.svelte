@@ -80,22 +80,6 @@
       font-size: 24px;
    }
 
-   #g1, #g2 {
-      color: #4285F4;
-   }
-
-   #o1, #e1 {
-      color: #EA4335;
-   }
-
-   #o2 {
-      color: #FBBC05;
-   }
-
-   #l1 {
-      color: #34A853;
-   }
-
    @media screen and (min-width: 769px) {
 
       .info-container {
