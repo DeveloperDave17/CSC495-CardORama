@@ -4,14 +4,16 @@
 
    let globals = new GlobalReferences();
 
-   let selectedStudySet = {flashcard: {term:"test", definition: "testing"}, connections: [{term: ""}, {term: ""}, {term: ""}]}
-   let currentFlashcardSide = selectedStudySet.flashcard.term;
+   let studyFlashcardSets = [{flashcard: {term:"test", definition: "testing"}, connections: [{term: ""}, {term: ""}, {term: ""}], flashcardColors: ["FFFFFF", "FFFFFF", "FFFFFF", "FFFFFF"]}];
+   let selectedStudySet = studyFlashcardSets[0];
+   $: currentFlashcardSide = selectedStudySet.flashcard.term;
    let studyPageDisplay = "none";
    let studySelectionPageDisplay = "flex";
    let userStudySets = [];
    let userStudySetSelection = [];
    let sharedStudySets = [];
    let sharedStudySetSelection = [];
+   let currentFlashcardIndex = 0;
 
    onMount(async () => {
       // get all of the users flashcardSets
@@ -27,8 +29,52 @@
    });
 
    function startStudySession() {
-      studySelectionPageDisplay = "none";
-      studyPageDisplay = "flex";
+      fetch(globals.backendBasePath + "/StudySession/create", {
+         mode: "same-origin",
+         method: "post",
+         headers: {
+                     "Content-Type" : "application/json",
+               },
+         credentials: "include",
+         body: JSON.stringify(userStudySetSelection)
+      }).then((response) => {
+         return response.json();
+      }).then((data) => {
+         console.log(data);
+         studyFlashcardSets = data;
+         if (studyFlashcardSets.length > 0) {
+            selectedStudySet = studyFlashcardSets[0];
+         }
+         studySelectionPageDisplay = "none";
+         studyPageDisplay = "flex";
+      })
+   }
+
+   function exitStudySession() {
+      studyPageDisplay = "none";
+      studySelectionPageDisplay = "flex";
+   }
+
+   function nextFlashcardSet() {
+      currentFlashcardIndex++;
+      currentFlashcardIndex = currentFlashcardIndex % studyFlashcardSets.length;
+      selectedStudySet = studyFlashcardSets[currentFlashcardIndex];
+   }
+
+   function previousFlashcardSet() {
+      currentFlashcardIndex--;
+      if (currentFlashcardIndex < 0) {
+         currentFlashcardIndex = studyFlashcardSets.length - 1;
+      }
+      selectedStudySet = studyFlashcardSets[currentFlashcardIndex];
+   }
+
+   function flipFlashcard() {
+      if (currentFlashcardSide === selectedStudySet.flashcard.term) {
+         currentFlashcardSide = selectedStudySet.flashcard.definition;
+      } else {
+         currentFlashcardSide = selectedStudySet.flashcard.term;
+      }
    }
 </script>
 
@@ -58,16 +104,17 @@
    <button id="start-study-ses-button" on:click={startStudySession}>Start Study Session</button>
 </div>
 <div id="study-page" style="display: {studyPageDisplay};">
+   <button id="exit-ses-button" on:click={exitStudySession}>Exit Study Session</button>
    <div id="flashcard-nav">
-      <button id="prev-button">Prev</button>
-      <button>Next</button>
+      <button id="prev-button" on:click={previousFlashcardSet}>Prev</button>
+      <button on:click={nextFlashcardSet}>Next</button>
    </div>
-   <div id="selected-flashcard"><p>{currentFlashcardSide}</p></div>
+   <div id="selected-flashcard" on:click={flipFlashcard} role="button" style="background-color: #{selectedStudySet.flashcardColors[0]};"><p>{currentFlashcardSide}</p></div>
    <button id="gen-connect-button">Generate Connectivity Graph</button>
    <div id="connections">
       <p>Suggested Connections</p>
-      {#each selectedStudySet.connections as connection}
-         <div class="connection"><p>{connection.term}</p></div>
+      {#each selectedStudySet.connections as connection, i}
+         <div class="connection" style="background-color: #{selectedStudySet.flashcardColors[i + 1]};"><p>{connection.term}</p></div>
       {/each}
    </div>
 </div>
@@ -123,6 +170,14 @@
       font-size: 24px;
       color: white;
       background-color: var(--primary-bg-color);
+   }
+
+   #exit-ses-button {
+      margin-top: 24px;
+      font-size: 24px;
+      height: 57px;
+      background-color: lightgray;
+      color: black;
    }
 
    #start-study-ses-button {
@@ -192,5 +247,18 @@
    input[type="checkbox"] {
       transform: scale(1.25);
       accent-color: var(--primary-bg-color);
+   }
+
+   .study-sets::-webkit-scrollbar {
+      width: 16px;
+   }
+
+   .study-sets::-webkit-scrollbar-track {
+      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+   }
+
+   .study-sets::-webkit-scrollbar-thumb {
+      background-color: var(--primary-bg-color);
+      outline: 1px solid black;
    }
 </style>
