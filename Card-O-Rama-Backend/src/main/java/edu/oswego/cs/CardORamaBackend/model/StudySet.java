@@ -1,21 +1,21 @@
 package edu.oswego.cs.CardORamaBackend.model;
 
+import java.util.List;
+
 import edu.oswego.cs.CardORamaBackend.model.flashcard.Flashcard;
 
 public class StudySet {
 
    private Flashcard flashcard;
-   private Flashcard connection1;
-   private Flashcard connection2;
-   private Flashcard connection3;
+   private List<Flashcard> connections;
+   private List<String> flashcardColors;
 
    public StudySet() {}
 
-   public StudySet(Flashcard flashcard, Flashcard connection1, Flashcard connection2, Flashcard connection3) {
+   public StudySet(Flashcard flashcard, List<Flashcard> connections, List<String> flashcardColors) {
       this.flashcard = flashcard;
-      this.connection1 = connection1;
-      this.connection2 = connection2;
-      this.connection3 = connection3;
+      this.connections = connections;
+      this.flashcardColors = flashcardColors;
    }
 
    public Flashcard getFlashcard() {
@@ -26,27 +26,19 @@ public class StudySet {
       this.flashcard = flashcard;
    }
 
-   public Flashcard getConnection1() {
-      return connection1;
+   public List<Flashcard> getConnections() {
+      return connections;
    }
 
-   public void setConnection1(Flashcard connection1) {
-      this.connection1 = connection1;
-   }
-   
-   public Flashcard getConnection2() {
-      return connection2;
+   public void setConnections(List<Flashcard> connections) {
+      this.connections = connections;
    }
 
-   public void setConnection2(Flashcard connection2) {
-      this.connection2 = connection2;
+   public List<String> getFlashcardColors() {
+      return flashcardColors;
    }
 
-   public Flashcard getConnection3() {
-      return connection3;
-   }
-
-   public void setConnection3(Flashcard connection3) {
-      this.connection3 = connection3;
+   public void setFlashcardColors(List<String> flashcardColors) {
+      this.flashcardColors = flashcardColors;
    }
 }
