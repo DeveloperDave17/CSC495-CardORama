@@ -10,7 +10,7 @@ public class TFIDF {
    
    public static HashMap<String,Integer> generateTFCountMap(Flashcard flashcard) {
       HashMap<String,Integer> tfIntMap = new HashMap<>();
-      String wordString = flashcard.getDefinition().replaceAll(",", "");
+      String wordString = flashcard.getDefinition().replaceAll("[,.]", "");
       String[] words = wordString.split(" ");
       for (String word : words) {
          tfIntMap.put(word, tfIntMap.getOrDefault(word, 0) + 1);
