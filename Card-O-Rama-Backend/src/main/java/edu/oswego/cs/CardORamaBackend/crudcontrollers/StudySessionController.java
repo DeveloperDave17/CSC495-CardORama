@@ -1,6 +1,7 @@
 package edu.oswego.cs.CardORamaBackend.crudcontrollers;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 import edu.oswego.cs.CardORamaBackend.model.StudySet;
 import edu.oswego.cs.CardORamaBackend.model.flashcard.Flashcard;
 import edu.oswego.cs.CardORamaBackend.model.flashcard.FlashcardRepository;
+import edu.oswego.cs.CardORamaBackend.model.flashcardset.FlashcardSet;
+import edu.oswego.cs.CardORamaBackend.model.flashcardset.FlashcardSetRepository;
 import edu.oswego.cs.CardORamaBackend.utils.DBUtils;
 import edu.oswego.cs.CardORamaBackend.utils.TFIDF;
 
@@ -33,14 +36,21 @@ public class StudySessionController {
    @Autowired
    FlashcardRepository flashcardRepository;
 
+   @Autowired
+   FlashcardSetRepository flashcardSetRepository;
+
    @PostMapping("/create")
    public ResponseEntity<List<StudySet>> createStudySession(@AuthenticationPrincipal OAuth2User principal, @RequestBody List<Long> flashcardSetIDs) {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       if (auth.isAuthenticated()) {
          List<Flashcard> flashcards = new ArrayList<>();
+         HashMap<Long,String> flashcardColorMap = new HashMap<>();
          // get all of the flashcards
          for (Long flashcardSetID : flashcardSetIDs) {
             if(DBUtils.userHasWriteAccessForFlashcardSet(principal.getAttribute("email"), flashcardSetID)) {
+               Optional<FlashcardSet> flashcardSet = this.flashcardSetRepository.findById(flashcardSetID);
+               String color = flashcardSet.isPresent() ? flashcardSet.get().getColor() : "FFFFFF";
+               flashcardColorMap.put(flashcardSetID, color);
                flashcards.addAll(this.flashcardRepository.findBySetID(flashcardSetID));
             }
          }
@@ -65,11 +75,11 @@ public class StudySessionController {
          // find the most similar terms.
          for (Flashcard flashcard : flashcards) {
             Flashcard connection1 = null;
-            double idfScore1 = 0.0;
+            double idfScore1 = -1.0;
             Flashcard connection2 = null;
-            double idfScore2 = 0.0;
+            double idfScore2 = -1.0;
             Flashcard connection3 = null;
-            double idfScore3 = 0.0;
+            double idfScore3 = -1.0;
 
             for (Flashcard otherFlashcard : flashcards) {
                if (flashcard == otherFlashcard) continue;
@@ -103,7 +113,17 @@ public class StudySessionController {
                   idfScore3 = idfScore;
                }
             }
-            studySets.add(new StudySet(flashcard, connection1, connection2, connection3));
+            // build the studyset
+            List<Flashcard> connections = new ArrayList<>();
+            if (connection1 != null) connections.add(connection1);
+            if (connection2 != null) connections.add(connection2);
+            if (connection3 != null) connections.add(connection3);
+            List<String> flashcardColors = new ArrayList<>();
+            flashcardColors.add(flashcardColorMap.get(flashcard.getSetID()));
+            for (Flashcard connection : connections) {
+               flashcardColors.add(flashcardColorMap.get(connection.getSetID()));
+            }
+            studySets.add(new StudySet(flashcard, connections, flashcardColors));
          }
          return ResponseEntity.ok(studySets);
       } else {
