@@ -13,7 +13,7 @@
          menuDisplayImage = "/images/close.svg";
       } else {
          menuDisplay = "none";
-         menuDisplayImage = "images/menu.svg";
+         menuDisplayImage = "/images/menu.svg";
       }
    }
 </script>
@@ -25,11 +25,11 @@
       <img id="nav-menu" src={menuDisplayImage} alt="selection menu" on:click={toggleHamburgerMenu}/>
       <a class="nav-text-links" href="{globalReferences.indexlocation}/home/flashcards">Edit</a>
       <a class="nav-text-links">Guides</a>
-      <a class="nav-text-links">Study</a>
+      <a class="nav-text-links" href="{globalReferences.indexlocation}/home/study">Study</a>
       <a class="nav-text-links" href="{globalReferences.indexlocation}/home">Home</a>
    </div>
    <div id="right-nav-bar">
-      <img id="nav-friends" src="/images/account-multiple.svg" alt="friends">
+      <img id="nav-friends" src="images/account-multiple.svg" alt="friends">
       <img id="nav-plus" src="/images/plus.svg" alt="flashcard sets"/> 
    </div>
 </div>
@@ -37,7 +37,7 @@
    <div id="hamburger-selection-menu" style="display: {menuDisplay}">
       <a href="{globalReferences.indexlocation}/home/flashcards">Edit</a>
       <a>Guides</a>
-      <a>Study</a>
+      <a href="{globalReferences.indexlocation}/home/study">Study</a>
       <a>Friends</a>
       <a href="{globalReferences.indexlocation}/home">Home</a>
    </div>
@@ -72,7 +72,7 @@
       align-items: center;
    }
 
-   #nav-bar a {
+   #nav-bar a, #hamburger-selection-menu a {
       text-decoration: none;
    }
 
