@@ -78,6 +78,7 @@ public class GoogleDriveController {
                   String termAndDefintion = run.getContent();
                   if (firstParagraph) {
                      separator = findSeparator(termAndDefintion);
+                     if (separator.equals("")) continue;
                      firstParagraph = false;
                   }
                   if (!separator.equals("") && termAndDefintion.contains(separator)) {
