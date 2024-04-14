@@ -1,6 +1,7 @@
 <script>
    import { GlobalReferences } from "$lib/globals";
    import { onMount } from "svelte";
+   import * as d3 from "d3";
 
    let globals = new GlobalReferences();
 
@@ -14,6 +15,9 @@
    let sharedStudySets = [];
    let sharedStudySetSelection = [];
    let currentFlashcardIndex = 0;
+
+   let displayGraph = "none";
+   let graphSVG;
 
    onMount(async () => {
       // get all of the users flashcardSets
@@ -40,7 +44,6 @@
       }).then((response) => {
          return response.json();
       }).then((data) => {
-         console.log(data);
          studyFlashcardSets = data;
          if (studyFlashcardSets.length > 0) {
             selectedStudySet = studyFlashcardSets[0];
@@ -76,6 +79,145 @@
          currentFlashcardSide = selectedStudySet.flashcard.term;
       }
    }
+
+   function generateGraph() {
+      const nodes = [];
+      const links = [];
+      let listOfAlreadyUsedTerms = [];
+      let targetFlashcardTerm = selectedStudySet.flashcard.term;
+      listOfAlreadyUsedTerms.push(targetFlashcardTerm);
+      nodes.push({id: targetFlashcardTerm, color: selectedStudySet.flashcardColors[0]});
+      let connectedCards = selectedStudySet.connections;
+      let colorNum = 1;
+      let connectCardsToBeUsed = [];
+      for (let connection of connectedCards) {
+         if (!listOfAlreadyUsedTerms.includes(connection.term)) {
+            nodes.push({id: connection.term, color: selectedStudySet.flashcardColors[colorNum]});
+            links.push({source: targetFlashcardTerm, target: connection.term, value: 1, strength: 1});
+            listOfAlreadyUsedTerms.push(connection.term);
+            connectCardsToBeUsed.push(connection);
+         }
+         colorNum++;
+      }
+      let connectedStudySets = [];
+      for (let studySet of studyFlashcardSets) {
+         for (let connection of connectCardsToBeUsed) {
+            if (connection.term === studySet.flashcard.term) connectedStudySets.push(studySet);
+         }
+      }
+      console.log(connectedStudySets);
+      // build another layer of nodes and links
+      for (let studySet of studyFlashcardSets) {
+         if (listOfAlreadyUsedTerms.includes(studySet.flashcard.term)) continue;
+         for (let connectedStudySet of connectedStudySets) {
+            // check the connections to this studyset
+            let connections = connectedStudySet.connections;
+            let colorNum = 1;
+            for (let connectionOfAConnection of connections) {
+               if (connectionOfAConnection.term === studySet.flashcard.term) {
+                  if (!listOfAlreadyUsedTerms.includes(studySet.flashcard.term)) {
+                     nodes.push({id: studySet.flashcard.term, color: connectedStudySet.flashcardColors[colorNum]});
+                     listOfAlreadyUsedTerms.push(studySet.flashcard.term);  
+                  }
+                  links.push({source: connectedStudySet.flashcard.term, target: studySet.flashcard.term, value: 1, strength: 1});
+                  colorNum++;
+               }
+            }
+         }
+      }
+      console.log(nodes);
+      console.log(links);
+
+      // clear the previous graph
+      graphSVG.innerHTML = "";
+
+      // generate the chart
+      const width = 800;
+      const height = 560;
+
+      const svg = d3.select("#connect-graph")
+         .attr("width", width)
+         .attr("height", height)
+         .attr("viewBox", [0, 0, width, height])
+         .attr("style", "max-width: 100%; height: auto;");
+
+      const nodeElements = svg.append("g")
+         .attr("class", "nodes")
+         .selectAll("g")
+         .data(nodes)
+         .enter()
+         .append("circle")
+         .attr("r", 12)
+         .attr("fill", node => "#" + node.color)
+         .attr("stroke", "black");
+
+      const textElements = svg.append("g")
+         .selectAll("text")
+         .data(nodes)
+         .enter().append("text")
+            .text(node => node.id)
+            .attr("font-size", 15)
+            .attr("dx", 15)
+            .attr("dy", 4);
+
+      const simulation = d3.forceSimulation(nodes)
+         .force("charge", d3.forceManyBody())
+         .force("center", d3.forceCenter(width / 2, height / 2));
+
+      const linkElements = svg.append('g')
+         .selectAll('line')
+         .data(links)
+         .enter().append('line')
+         .attr('stroke-width', 1)
+         .attr('stroke', "#999999")
+         .attr('stroke-opacity', 0.6);
+
+      function ticked() {
+         nodeElements
+            .attr("cx", d => d.x)
+            .attr("cy", d => d.y);
+
+         textElements
+            .attr("x", node => node.x)
+            .attr("y", node => node.y);
+
+         linkElements
+            .attr("x1", link => link.source.x)
+            .attr("y1", link => link.source.y)
+            .attr("x2", link => link.target.x)
+            .attr("y2", link => link.target.y);
+      }
+
+      simulation.on("tick", ticked);
+      simulation.force("link", d3.forceLink(links).id(link => link.id).strength(link => link.strength).distance(160));
+
+      function dragstart(event) {
+         event.subject.fx = event.x;
+         event.subject.fy = event.y;
+         console.log("hey");
+      }
+
+      function dragmove(event, d) {
+         simulation.alphaTarget(0.7).restart();
+         event.subject.fx = event.x;
+         event.subject.fy = event.y;
+      }
+
+      function dragend(event) {
+         simulation.alphaTarget(0);
+         event.subject.fx = null;
+         event.subject.fy = null;
+         console.log("ended");
+      }
+
+      nodeElements.call(d3.drag().on("start", dragstart).on("drag", dragmove).on("end", dragend));
+
+      displayGraph = "flex";
+   }
+
+   function closeGraph() {
+      displayGraph = "none";
+   }
 </script>
 
 <div id="study-selection" style="display: {studySelectionPageDisplay};">
@@ -110,12 +252,18 @@
       <button on:click={nextFlashcardSet}>Next</button>
    </div>
    <div id="selected-flashcard" on:click={flipFlashcard} role="button" style="background-color: #{selectedStudySet.flashcardColors[0]};"><p>{currentFlashcardSide}</p></div>
-   <button id="gen-connect-button">Generate Connectivity Graph</button>
+   <button id="gen-connect-button" on:click={generateGraph}>Generate Connectivity Graph</button>
    <div id="connections">
       <p>Suggested Connections</p>
       {#each selectedStudySet.connections as connection, i}
          <div class="connection" style="background-color: #{selectedStudySet.flashcardColors[i + 1]};"><p>{connection.term}</p></div>
       {/each}
+   </div>
+</div>
+<div id="graph-modal" style="display: {displayGraph};">
+   <div id="graph-pop-up">
+      <button id="graph-close" on:click={closeGraph}></button>
+      <svg id="connect-graph" bind:this={graphSVG}></svg>
    </div>
 </div>
 
@@ -260,5 +408,35 @@
    .study-sets::-webkit-scrollbar-thumb {
       background-color: var(--primary-bg-color);
       outline: 1px solid black;
+   }
+
+   #graph-modal {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      justify-content: center;
+      align-items: center;
+   }
+
+   #graph-pop-up {
+      background-color: white;
+      height: 600px;
+      width: 800px;
+      display: flex;
+      flex-direction: column;
+      border: 2px solid black;
+   }
+
+   #graph-close{
+      height: 40px;
+      font-size: 24px;
+      width: 40px;
+      background: url("/images/close-box.svg");
+      box-sizing: border-box;
+      padding: 0;
+      border: none;
+      margin: 0;
+      align-self: flex-end;
    }
 </style>
