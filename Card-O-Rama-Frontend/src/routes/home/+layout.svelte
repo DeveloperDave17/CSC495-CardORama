@@ -29,8 +29,8 @@
       <a class="nav-text-links" href="{globalReferences.indexlocation}/home">Home</a>
    </div>
    <div id="right-nav-bar">
-      <img id="nav-friends" src="images/account-multiple.svg" alt="friends">
-      <img id="nav-plus" src="/images/plus.svg" alt="flashcard sets"/> 
+      <img id="nav-friends" src="/images/account-multiple.svg" alt="friends">
+      <a title="Google Docs Upload" href="{globalReferences.indexlocation}/home/docs"><img id="nav-upload" src="/images/upload.svg" alt="Google document upload."/></a>
    </div>
 </div>
 {#if innerWidth < 769}
@@ -59,7 +59,7 @@
       flex-direction: column;
    }
 
-   #nav-plus, #nav-menu, #nav-friends {
+   #nav-upload, #nav-menu, #nav-friends {
       width: 64px;
       height: 64px;
    }
