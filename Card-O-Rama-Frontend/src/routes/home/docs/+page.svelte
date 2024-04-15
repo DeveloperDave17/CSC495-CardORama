@@ -2,6 +2,7 @@
    import { GlobalReferences } from "$lib/globals";
    import { onMount } from "svelte";
    import Swal from "sweetalert2";
+   import { PUBLIC_DOC_API_KEY } from "$env/static/public";
 
    let globals = new GlobalReferences();
    function test() {
@@ -44,7 +45,7 @@
          const picker = new google.picker.PickerBuilder()
             .addView(google.picker.ViewId.DOCUMENTS)
             .setOAuthToken(accessToken)
-            .setDeveloperKey("AIzaSyCnY7IiNRns8IA5-2p88s4on1-D4NYIAw8")
+            .setDeveloperKey(PUBLIC_DOC_API_KEY)
             .setCallback(pickerCallBack)
             .build();
          picker.setVisible(true);
