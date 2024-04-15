@@ -91,7 +91,7 @@
 <div id="page">
    <div id="page-content">
       <img src="/images/drive_logo.png" alt="Google Drive Logo">
-      <p>Select a document to parse into flashcards. Make sure all of the desired terms and defintions are seperated
+      <p>Select a Google document to parse into flashcards. Make sure all of the desired terms and defintions are seperated
          by the same deliminators. Allowed deliminators include colon(:), semi-colon(;), comma(,), hyphen(-), and is.
          The colon symbol is recommended as it takes priority over other symbols.
       </p>
