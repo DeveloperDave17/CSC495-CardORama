@@ -86,53 +86,56 @@
    }
 
    onMount(async () => {
-      // get the flashcardSets
-      const responseToGetAll = await fetch(globals.backendBasePath + "/FlashcardSet/getAll", {
-         mode: "same-origin",
-         method: "get",
-         credentials: "include"
-      });
-
-      // load the first flashcard set or create one if one doesn't exist.
-      if (responseToGetAll.ok) {
-         flashcardSets = await responseToGetAll.json();
-         if (flashcardSets.length === 0) {
-            const responseToCreate = await fetch(globals.backendBasePath + "/FlashcardSet/create", {
-               method: "post",
-               headers: {
-                     "Content-Type" : "application/json",
-               },
-               credentials: "include",
-               body: `{
-                  "setName": "Flashcard Set 1",
-                  "privacy": "PRIVATE",
-                  "color": "#FFFFFF",
-                  "priority": "1"
-               }`
-            });
-
-            if (responseToCreate.ok) {
-               flashcardSet = await responseToCreate.json();
-               flashcardSets.push([flashcardSet]);
-            }
-         } else {
-            currentFlashcardSet = flashcardSets[0];
-         }
-
-         // get all of the flashcards from the flashcard set
-         const getAllFlashCards = await fetch(globals.backendBasePath + `/Flashcard/getAll/${currentFlashcardSet.setID}`, {
+      try {
+         // get the flashcardSets
+         const responseToGetAll = await fetch(globals.backendBasePath + "/FlashcardSet/getAll", {
             mode: "same-origin",
             method: "get",
             credentials: "include"
-         }); 
+         });
 
-         if (getAllFlashCards.ok) {
-            flashcards = await getAllFlashCards.json();
+         // load the first flashcard set or create one if one doesn't exist.
+         if (responseToGetAll.ok) {
+            flashcardSets = await responseToGetAll.json();
+            if (flashcardSets.length === 0) {
+               const responseToCreate = await fetch(globals.backendBasePath + "/FlashcardSet/create", {
+                  method: "post",
+                  headers: {
+                        "Content-Type" : "application/json",
+                  },
+                  credentials: "include",
+                  body: `{
+                     "setName": "Flashcard Set 1",
+                     "privacy": "PRIVATE",
+                     "color": "#FFFFFF",
+                     "priority": "1"
+                  }`
+               });
+
+               if (responseToCreate.ok) {
+                  flashcardSet = await responseToCreate.json();
+                  flashcardSets.push([flashcardSet]);
+               }
+            } else {
+               currentFlashcardSet = flashcardSets[0];
+            }
+
+            // get all of the flashcards from the flashcard set
+            const getAllFlashCards = await fetch(globals.backendBasePath + `/Flashcard/getAll/${currentFlashcardSet.setID}`, {
+               mode: "same-origin",
+               method: "get",
+               credentials: "include"
+            }); 
+
+            if (getAllFlashCards.ok) {
+               flashcards = await getAllFlashCards.json();
+            }
+         } else {
+            window.location.href = globalReferences.indexlocation;
          }
-      } else {
+      } catch (exception)  {
          window.location.href = globalReferences.indexlocation;
       }
-
    });
 
    function changeFlashcardSet(flashcardSet) {
@@ -307,7 +310,7 @@
       </select> 
    </div>
 
-   <h1>Flashcards</h1>
+   <h1 id="flashcards-title">Flashcards</h1>
    <div class="flashcard-container">
       <section
          use:dndzone="{{ items: flashcards, dropTargetStyle: {} }}"
@@ -320,7 +323,7 @@
                <label for="term{flashcard.flashcardID}">Term</label>
                <img class="flashcard-trashcan" src="/images/trash-can-outline.svg" alt="delete button" on:click={() => removeFlashcard(flashcard)}>
             </div>
-            <input class="term-inputs" type="text" id="term{flashcard.flashcardID}" name="term{flashcard.flashcardID}" bind:value={flashcard.term} on:change={() => updateFlashcardTerm(flashcard)}>
+            <textarea class="term-inputs" type="text" id="term{flashcard.flashcardID}" name="term{flashcard.flashcardID}" bind:value={flashcard.term} on:change={() => updateFlashcardTerm(flashcard)} rows="1"/>
             <label for="definition{flashcard.flashcardID}">Definition</label>
             <textarea class="definitions" id="definition{flashcard.flashcardID}" name="definition{flashcard.flashcardID}" bind:value={flashcard.definition} on:change={() => updateFlashcardDefinition(flashcard)} rows="4"/>
          </div>
@@ -372,12 +375,17 @@
       border-radius: 10px;
    }
 
-   #flashcard-set-list::-webkit-scrollbar-track {
+   .term-inputs::-webkit-scrollbar, .definitions::-webkit-scrollbar {
+      width: 8px;
+      border-radius: 10px;
+   }
+
+   #flashcard-set-list::-webkit-scrollbar-track, .term-inputs::-webkit-scrollbar-track, .definitions::-webkit-scrollbar-track {
       box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
       border-radius: 10px;
    }
 
-   #flashcard-set-list::-webkit-scrollbar-thumb {
+   #flashcard-set-list::-webkit-scrollbar-thumb, .term-inputs::-webkit-scrollbar-thumb, .definitions::-webkit-scrollbar-thumb {
       background-color: var(--primary-bg-color);
       border-radius: 10px;
       outline: 1px solid black;
@@ -471,9 +479,40 @@
       color: white;
       font-size: 20px;
       border-radius: 10px;
+      margin-bottom: 32px;
    }
 
-   .invisible {
-      opacity: 0;
+   :global(body) {
+      overflow-y: scroll;
+   }
+
+   @media screen and (min-width: 769px) {
+      .flashcard, #flashcard-set-button, #flashcard-set-list, .flashcard-set-values, #new-flashcard-button {
+         width: clamp(600px, 70vw, 800px);
+      }
+
+      #flashcard-set-button {
+         font-size: 32px;
+      }
+
+      #flashcard-set-list {
+         font-size: 24px;
+      }
+
+      .flashcard-set-list-ele > li {
+         height: 24px;
+      }
+
+      .flashcard-set-values > label, .flashcard-set-values > input, .flashcard-set-values > select {
+         font-size: 28px;
+      }
+
+      #flashcard-set-title {
+         font-size: 32px;
+      }
+
+      .flashcard, .term-inputs, .definitions {
+         font-size: 24px;
+      }
    }
 </style>
