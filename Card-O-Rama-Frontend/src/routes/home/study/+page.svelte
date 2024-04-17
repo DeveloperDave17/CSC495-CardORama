@@ -17,6 +17,7 @@
    let currentFlashcardIndex = 0;
 
    let displayGraph = "none";
+   let loadingDisplay = "none";
    let graphSVG;
 
    onMount(async () => {
@@ -33,6 +34,7 @@
    });
 
    function startStudySession() {
+      loadingDisplay = "flex";
       fetch(globals.backendBasePath + "/StudySession/create", {
          mode: "same-origin",
          method: "post",
@@ -49,6 +51,7 @@
             selectedStudySet = studyFlashcardSets[0];
          }
          studySelectionPageDisplay = "none";
+         loadingDisplay = "none";
          studyPageDisplay = "flex";
       })
    }
@@ -99,34 +102,27 @@
          }
          colorNum++;
       }
+
       let connectedStudySets = [];
       for (let studySet of studyFlashcardSets) {
          for (let connection of connectCardsToBeUsed) {
-            if (connection.term === studySet.flashcard.term) connectedStudySets.push(studySet);
-         }
-      }
-      console.log(connectedStudySets);
-      // build another layer of nodes and links
-      for (let studySet of studyFlashcardSets) {
-         if (listOfAlreadyUsedTerms.includes(studySet.flashcard.term)) continue;
-         for (let connectedStudySet of connectedStudySets) {
-            // check the connections to this studyset
-            let connections = connectedStudySet.connections;
-            let colorNum = 1;
-            for (let connectionOfAConnection of connections) {
-               if (connectionOfAConnection.term === studySet.flashcard.term) {
-                  if (!listOfAlreadyUsedTerms.includes(studySet.flashcard.term)) {
-                     nodes.push({id: studySet.flashcard.term, color: connectedStudySet.flashcardColors[colorNum]});
-                     listOfAlreadyUsedTerms.push(studySet.flashcard.term);  
-                  }
-                  links.push({source: connectedStudySet.flashcard.term, target: studySet.flashcard.term, value: 1, strength: 1});
-                  colorNum++;
-               }
+            if (connection.term === studySet.flashcard.term) {
+               connectedStudySets.push(studySet);
             }
          }
       }
-      console.log(nodes);
-      console.log(links);
+      for (let connectedStudySet of connectedStudySets) {
+         let connections = connectedStudySet.connections;
+         let colorNum = 1;
+         for (let connectionOfAConnection of connections) {
+               if (!listOfAlreadyUsedTerms.includes(connectionOfAConnection.term)) {
+                  nodes.push({id: connectionOfAConnection.term, color: connectedStudySet.flashcardColors[colorNum]});
+                  listOfAlreadyUsedTerms.push(connectionOfAConnection.term);  
+                  links.push({source: connectedStudySet.flashcard.term, target: connectionOfAConnection.term, value: 1, strength: 1});
+               }
+               colorNum++;
+            }
+      }
 
       // clear the previous graph
       graphSVG.innerHTML = "";
@@ -264,6 +260,11 @@
    <div id="graph-pop-up">
       <button id="graph-close" on:click={closeGraph}></button>
       <svg id="connect-graph" bind:this={graphSVG}></svg>
+   </div>
+</div>
+<div id="loading-page" style="display: {loadingDisplay};">
+   <div id="loading-content">
+      <img id="loading-img" src="/images/loading.svg" alt="loading">
    </div>
 </div>
 
@@ -438,5 +439,35 @@
       border: none;
       margin: 0;
       align-self: flex-end;
+   }
+
+   #loading-page {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      justify-content: center;
+      align-items: center;
+   }
+
+   #loading-content {
+      background-color: white;
+      box-sizing: border-box;
+      padding: 20px;
+      width: 200px;
+      height: 200px;
+   }
+
+   #loading-img {
+      animation: spin 1s linear infinite;
+   }
+
+   @keyframes spin {
+      0% {
+         transform: rotate(0deg);
+      }
+      100% {
+         transform: rotate(360deg);
+      }
    }
 </style>
