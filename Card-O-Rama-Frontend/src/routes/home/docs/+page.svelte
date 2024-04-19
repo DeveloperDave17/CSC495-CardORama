@@ -5,18 +5,6 @@
    import { PUBLIC_DOC_API_KEY } from "$env/static/public";
 
    let globals = new GlobalReferences();
-   function test() {
-      fetch(globals.backendBasePath + `/GoogleDrive/info`, {
-               mode: "same-origin",
-               method: "get",
-               credentials: "include"
-            }).then((response) => {
-               console.log(response)
-               return response.json();
-            }).then((data) => {
-               console.log(data);
-            })
-   }
 
    let pickerInited = false;
    let loadingDisplay = "none";
@@ -32,7 +20,11 @@
                method: "get",
                credentials: "include",
             }).then((response) => {
-               return response.text();
+               if (response.ok) {
+                  return response.text();
+               } else {
+                  window.location.href = globals.indexlocation;
+               }
             }).then((data) => {
                console.log(data);
                createPicker(data);
@@ -67,10 +59,17 @@
             }).then((response) => {
                console.log(response.status);
                loadingDisplay = "none";
-               Swal.fire({
-                  title: "Flashcard Set Creation Success!",
-                  icon: "success"
-               });
+               if (response.ok) {
+                  Swal.fire({
+                     title: "Flashcard Set Creation Success!",
+                     icon: "success"
+                  });
+               } else {
+                  Swal.fire({
+                     title: "Flashcard Set Creation Unsuccessful.",
+                     icon: "error"
+                  });
+               }
             })
       }
    }

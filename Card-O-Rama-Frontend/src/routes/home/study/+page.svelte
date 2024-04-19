@@ -30,6 +30,8 @@
 
       if (responseToGetAll.ok) {
          userStudySets = await responseToGetAll.json();
+      } else {
+         window.location.href = globals.indexlocation;
       }
    });
 

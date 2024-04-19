@@ -4,6 +4,7 @@
    import { onMount } from "svelte";
    import { overrideItemIdKeyNameBeforeInitialisingDndZones } from "svelte-dnd-action";
    import { dndzone } from "svelte-dnd-action";
+	import Layout from "../+layout.svelte";
    overrideItemIdKeyNameBeforeInitialisingDndZones("flashcardID");
    
    let globals = new GlobalReferences();
@@ -13,6 +14,11 @@
    let flashcards = [];
    $: flashcardSetLength = flashcardSets.length;
    $: flashcardColors = "#" + currentFlashcardSet.color;
+   let innerWidth;
+   let desktopMinWidth = 769;
+   let desktopDefRowCount = 3;
+   let mobileDefRowCount = 4;
+   $: definitionRowCount = innerWidth > desktopMinWidth ? desktopDefRowCount : mobileDefRowCount;
 
    function getFlashcards(flashcardSetID) {
       fetch(globals.backendBasePath + `/Flashcard/getAll/${flashcardSetID}`, {
@@ -107,7 +113,7 @@
                   body: `{
                      "setName": "Flashcard Set 1",
                      "privacy": "PRIVATE",
-                     "color": "#FFFFFF",
+                     "color": "FFFFFF",
                      "priority": "1"
                   }`
                });
@@ -131,10 +137,10 @@
                flashcards = await getAllFlashCards.json();
             }
          } else {
-            window.location.href = globalReferences.indexlocation;
+            window.location.href = globals.indexlocation;
          }
       } catch (exception)  {
-         window.location.href = globalReferences.indexlocation;
+         window.location.href = globals.indexlocation;
       }
    });
 
@@ -152,7 +158,7 @@
                credentials: "include"
             }).then((response) => {
                if (!response.ok) {
-                  window.location.href = globalReferences.indexlocation;
+                  window.location.href = globals.indexlocation;
                }
             });
    }
@@ -166,7 +172,7 @@
                credentials: "include"
             }).then((response) => {
                if (!response.ok) {
-                  window.location.href = globalReferences.indexlocation;
+                  window.location.href = globals.indexlocation;
                }
             });
    }
@@ -180,7 +186,7 @@
                credentials: "include"
             }).then((response) => {
                if (!response.ok) {
-                  window.location.href = globalReferences.indexlocation;
+                  window.location.href = globals.indexlocation;
                }
             });
       // Ensures the flashcard sets update for the user.
@@ -195,7 +201,7 @@
                credentials: "include"
             }).then((response) => {
                if (!response.ok) {
-                  window.location.href = globalReferences.indexlocation;
+                  window.location.href = globals.indexlocation;
                }
             });
    }
@@ -207,7 +213,7 @@
                credentials: "include"
             }).then((response) => {
                if (!response.ok) {
-                  window.location.href = globalReferences.indexlocation;
+                  window.location.href = globals.indexlocation;
                }
             });
    }
@@ -219,7 +225,7 @@
                credentials: "include"
             }).then((response) => {
                if (!response.ok) {
-                  window.location.href = globalReferences.indexlocation;
+                  window.location.href = globals.indexlocation;
                }
             });
       let index = flashcards.indexOf(flashcard);
@@ -235,7 +241,7 @@
                credentials: "include"
             }).then((response) => {
                if (!response.ok) {
-                  window.location.href = globalReferences.indexlocation;
+                  window.location.href = globals.indexlocation;
                }
             });
       let index = flashcardSets.indexOf(flashcardSet);
@@ -270,6 +276,7 @@
    }
 </script>
 
+<svelte:window bind:innerWidth />
 <div id="flashcard-set-page">
    <button id="flashcard-set-button" on:click={toggleFlashcardSetList}>
       <span>{currentFlashcardSet.setName}</span>
@@ -325,7 +332,7 @@
             </div>
             <textarea class="term-inputs" type="text" id="term{flashcard.flashcardID}" name="term{flashcard.flashcardID}" bind:value={flashcard.term} on:change={() => updateFlashcardTerm(flashcard)} rows="1"/>
             <label for="definition{flashcard.flashcardID}">Definition</label>
-            <textarea class="definitions" id="definition{flashcard.flashcardID}" name="definition{flashcard.flashcardID}" bind:value={flashcard.definition} on:change={() => updateFlashcardDefinition(flashcard)} rows="4"/>
+            <textarea class="definitions" id="definition{flashcard.flashcardID}" name="definition{flashcard.flashcardID}" bind:value={flashcard.definition} on:change={() => updateFlashcardDefinition(flashcard)} rows="{definitionRowCount}"/>
          </div>
       {/each}
       </section>
