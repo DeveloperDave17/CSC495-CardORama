@@ -1,5 +1,6 @@
 package edu.oswego.cs.CardORamaBackend.crudcontrollers;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +24,9 @@ import edu.oswego.cs.CardORamaBackend.model.flashcard.FlashcardRepository;
 import edu.oswego.cs.CardORamaBackend.model.flashcardset.FlashcardSet;
 import edu.oswego.cs.CardORamaBackend.model.flashcardset.FlashcardSetPrivacy;
 import edu.oswego.cs.CardORamaBackend.model.flashcardset.FlashcardSetRepository;
+import edu.oswego.cs.CardORamaBackend.model.friend.Friend;
+import edu.oswego.cs.CardORamaBackend.model.friend.FriendID;
+import edu.oswego.cs.CardORamaBackend.model.friend.FriendRepository;
 import edu.oswego.cs.CardORamaBackend.utils.DBUtils;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -36,6 +40,9 @@ public class FlashcardSetController {
 
    @Autowired
    FlashcardRepository flashcardRepository;
+
+   @Autowired
+   FriendRepository friendRepository;
 
    @GetMapping("/getAll")
    public ResponseEntity<List<FlashcardSet>> getFlashcardSets(@AuthenticationPrincipal OAuth2User principal) {
@@ -119,5 +126,24 @@ public class FlashcardSetController {
       } else {
          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
       }
+   }
+
+   @GetMapping("/getAllSharedFlashcardSets/{targetUserEmail}")
+   public ResponseEntity<List<FlashcardSet>> getSharedFlashcardSets(@AuthenticationPrincipal OAuth2User principal, @PathVariable(name = "targetUserEmail") String targetUserEmail) {
+      List<FlashcardSet> targetUserFlashcardSets = this.flashcardSetRepository.findByEmailOrderByPriority(targetUserEmail);
+      List<FlashcardSet> sharedFlashcardSets = new ArrayList<>();
+      String userEmail = principal.getAttribute("email");
+      for (FlashcardSet flashcardSet : targetUserFlashcardSets) {
+         if (flashcardSet.getPrivacy() == FlashcardSetPrivacy.PUBLIC) {
+            sharedFlashcardSets.add(flashcardSet);
+         } else if (flashcardSet.getPrivacy() == FlashcardSetPrivacy.FRIENDS) {
+            FriendID friendID = new FriendID(userEmail, targetUserEmail);
+            Optional<Friend> friendship = this.friendRepository.findById(friendID);
+            if (friendship.isPresent()) {
+               sharedFlashcardSets.add(flashcardSet);
+            }
+         }
+      }
+      return ResponseEntity.ok(sharedFlashcardSets);
    }
 }
