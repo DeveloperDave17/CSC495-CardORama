@@ -57,6 +57,10 @@ public class FriendService {
 
    @Transactional
    public void sendFriendRequest(String userEmail, String friendReqEmail) {
+      // A user cannot send a friend request to themself
+      if (userEmail.equals(friendReqEmail)) {
+         return;
+      }
       Optional<Friend> friend = this.friendRepository.findById(new FriendID(userEmail, friendReqEmail));
       // if the friendship doesn't exist
       if (!friend.isPresent()) {
