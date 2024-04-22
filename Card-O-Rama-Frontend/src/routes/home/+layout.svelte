@@ -29,7 +29,7 @@
       <a class="nav-text-links" href="{globalReferences.indexlocation}/home">Home</a>
    </div>
    <div id="right-nav-bar">
-      <img id="nav-friends" src="/images/account-multiple.svg" alt="friends">
+      <a href="{globalReferences.indexlocation}/home/friends"><img id="nav-friends" src="/images/account-multiple.svg" alt="friends"></a>
       <a title="Google Docs Upload" href="{globalReferences.indexlocation}/home/docs"><img id="nav-upload" src="/images/upload.svg" alt="Google document upload."/></a>
    </div>
 </div>
@@ -38,7 +38,7 @@
       <a href="{globalReferences.indexlocation}/home/flashcards">Edit</a>
       <a>Guides</a>
       <a href="{globalReferences.indexlocation}/home/study">Study</a>
-      <a>Friends</a>
+      <a href="{globalReferences.indexlocation}/home/friends">Friends</a>
       <a href="{globalReferences.indexlocation}/home">Home</a>
    </div>
 {/if}
@@ -122,7 +122,7 @@
 
 
 
-   @media screen and (min-width: 769px) {
+   @media screen and (min-width: 950px) {
       #nav-menu {
          display: none;
       }
