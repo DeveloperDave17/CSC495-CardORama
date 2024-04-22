@@ -13,6 +13,8 @@ import edu.oswego.cs.CardORamaBackend.model.friendRequest.FriendRequest;
 import edu.oswego.cs.CardORamaBackend.model.friendRequest.FriendRequestID;
 import edu.oswego.cs.CardORamaBackend.model.friendRequest.FriendRequestRepository;
 import edu.oswego.cs.CardORamaBackend.model.friendRequest.FriendRequestStatus;
+import edu.oswego.cs.CardORamaBackend.model.user.User;
+import edu.oswego.cs.CardORamaBackend.model.user.UserRepository;
 
 @Service
 @Transactional
@@ -23,6 +25,9 @@ public class FriendService {
 
    @Autowired
    FriendRequestRepository friendRequestRepository;
+
+   @Autowired
+   UserRepository userRepository;
 
    @Transactional
    public void createFriendship(String email1, String email2) {
@@ -65,8 +70,12 @@ public class FriendService {
                this.friendRequestRepository.save(friendRequest);
             }
          } else {
-            FriendRequest friendRequest = new FriendRequest(userEmail, friendReqEmail);
-            this.friendRequestRepository.save(friendRequest);
+            // confirm the user the request is intended for exists
+            Optional<User> user = userRepository.findById(friendReqEmail);
+            if (user.isPresent()) {
+               FriendRequest friendRequest = new FriendRequest(userEmail, friendReqEmail);
+               this.friendRequestRepository.save(friendRequest);
+            }
          }
       }
    }
