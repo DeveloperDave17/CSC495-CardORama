@@ -67,7 +67,7 @@ public class FlashcardController {
          || (flashcardSet.getPrivacy() == FlashcardSetPrivacy.FRIENDS 
             && this.friendRepository.findById(new FriendID(userEmail, flashcardSet.getEmail())).isPresent())) {
             flashcards = this.flashcardRepository.findBySetIDOrderByPosition(setID);
-         }
+         }  
       } 
       return ResponseEntity.ok(flashcards);
    }
