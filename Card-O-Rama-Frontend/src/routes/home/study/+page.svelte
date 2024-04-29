@@ -12,8 +12,8 @@
    let studySelectionPageDisplay = "flex";
    let userStudySets = [];
    let userStudySetSelection = [];
-   let sharedStudySets = [];
-   let sharedStudySetSelection = [];
+   let favoritedStudySets = [];
+   let favoritedStudySetSelection = [];
    let currentFlashcardIndex = 0;
 
    let displayGraph = "none";
@@ -33,6 +33,19 @@
       } else {
          window.location.href = globals.indexlocation;
       }
+
+      // get all of the users favorited flashcardSets
+      const responseToGetAllFavorited = await fetch(globals.backendBasePath + "/Favorite/getAll", {
+         mode: "same-origin",
+         method: "get",
+         credentials: "include"
+      });
+
+      if (responseToGetAllFavorited.ok) {
+         favoritedStudySets = await responseToGetAllFavorited.json();
+      } else {
+         window.location.href = globals.indexlocation;
+      }
    });
 
    function startStudySession() {
@@ -44,7 +57,7 @@
                      "Content-Type" : "application/json",
                },
          credentials: "include",
-         body: JSON.stringify(userStudySetSelection)
+         body: JSON.stringify(userStudySetSelection.concat(favoritedStudySetSelection))
       }).then((response) => {
          return response.json();
       }).then((data) => {
@@ -192,7 +205,6 @@
       function dragstart(event) {
          event.subject.fx = event.x;
          event.subject.fy = event.y;
-         console.log("hey");
       }
 
       function dragmove(event, d) {
@@ -205,7 +217,6 @@
          simulation.alphaTarget(0);
          event.subject.fx = null;
          event.subject.fy = null;
-         console.log("ended");
       }
 
       nodeElements.call(d3.drag().on("start", dragstart).on("drag", dragmove).on("end", dragend));
@@ -231,12 +242,12 @@
       </div>
    </div>
    <div id="friends-study-sets">
-      <h1>Shared Study Sets</h1>
+      <h1>Favorited Study Sets</h1>
       <div class="study-sets">
-      {#each sharedStudySets as sharedStudySet}
+      {#each favoritedStudySets as favoritedStudySet}
          <div class="selections">
-            <input type="checkbox" id="{sharedStudySet.setID}" name="{sharedStudySet.setID}" bind:group={sharedStudySetSelection} value="{sharedStudySet.setID}">
-            <label for="{sharedStudySet.setID}">{sharedStudySet.setName}</label>
+            <input type="checkbox" id="{favoritedStudySet.setID}" name="{favoritedStudySet.setID}" bind:group={favoritedStudySetSelection} value="{favoritedStudySet.setID}">
+            <label for="{favoritedStudySet.setID}">{favoritedStudySet.setName}</label>
          </div>
       {/each}
       </div>
