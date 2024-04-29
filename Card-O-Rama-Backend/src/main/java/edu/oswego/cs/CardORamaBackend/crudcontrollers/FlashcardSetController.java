@@ -20,6 +20,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.oswego.cs.CardORamaBackend.model.favoritedFlashcardSet.FavoritedFlashcardSet;
+import edu.oswego.cs.CardORamaBackend.model.favoritedFlashcardSet.FavoritedFlashcardSetID;
+import edu.oswego.cs.CardORamaBackend.model.favoritedFlashcardSet.FavoritedFlashcardSetRepository;
 import edu.oswego.cs.CardORamaBackend.model.flashcard.FlashcardRepository;
 import edu.oswego.cs.CardORamaBackend.model.flashcardset.FlashcardSet;
 import edu.oswego.cs.CardORamaBackend.model.flashcardset.FlashcardSetPrivacy;
@@ -28,6 +31,7 @@ import edu.oswego.cs.CardORamaBackend.model.friend.Friend;
 import edu.oswego.cs.CardORamaBackend.model.friend.FriendID;
 import edu.oswego.cs.CardORamaBackend.model.friend.FriendRepository;
 import edu.oswego.cs.CardORamaBackend.utils.DBUtils;
+import edu.oswego.cs.CardORamaBackend.wrappers.FlashcardSetAndFavorited;
 import jakarta.servlet.http.HttpServletResponse;
 
 @CrossOrigin(origins = "http://localhost:8080")
@@ -43,6 +47,9 @@ public class FlashcardSetController {
 
    @Autowired
    FriendRepository friendRepository;
+
+   @Autowired
+   FavoritedFlashcardSetRepository favoritedFlashcardSetRepository;
 
    @GetMapping("/getAll")
    public ResponseEntity<List<FlashcardSet>> getFlashcardSets(@AuthenticationPrincipal OAuth2User principal) {
@@ -129,7 +136,7 @@ public class FlashcardSetController {
    }
 
    @GetMapping("/getAllSharedFlashcardSets/{targetUserEmail}")
-   public ResponseEntity<List<FlashcardSet>> getSharedFlashcardSets(@AuthenticationPrincipal OAuth2User principal, @PathVariable(name = "targetUserEmail") String targetUserEmail) {
+   public ResponseEntity<List<FlashcardSetAndFavorited>> getSharedFlashcardSets(@AuthenticationPrincipal OAuth2User principal, @PathVariable(name = "targetUserEmail") String targetUserEmail) {
       List<FlashcardSet> targetUserFlashcardSets = this.flashcardSetRepository.findByEmailOrderByPriority(targetUserEmail);
       List<FlashcardSet> sharedFlashcardSets = new ArrayList<>();
       String userEmail = principal.getAttribute("email");
@@ -144,6 +151,13 @@ public class FlashcardSetController {
             }
          }
       }
-      return ResponseEntity.ok(sharedFlashcardSets);
+
+      List<FlashcardSetAndFavorited> flashcardSetsAndFavorites = new ArrayList<>();
+      for (FlashcardSet flashcardSet : sharedFlashcardSets) {
+         Optional<FavoritedFlashcardSet> optionalFavorited = this.favoritedFlashcardSetRepository.findById(new FavoritedFlashcardSetID(userEmail, flashcardSet.getSetID()));
+         flashcardSetsAndFavorites.add(new FlashcardSetAndFavorited(flashcardSet, optionalFavorited.isPresent()));
+      }
+
+      return ResponseEntity.ok(flashcardSetsAndFavorites);
    }
 }
