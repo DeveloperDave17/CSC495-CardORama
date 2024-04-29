@@ -21,9 +21,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.oswego.cs.CardORamaBackend.model.StudySet;
+import edu.oswego.cs.CardORamaBackend.model.favoritedFlashcardSet.FavoritedFlashcardSet;
+import edu.oswego.cs.CardORamaBackend.model.favoritedFlashcardSet.FavoritedFlashcardSetID;
+import edu.oswego.cs.CardORamaBackend.model.favoritedFlashcardSet.FavoritedFlashcardSetRepository;
 import edu.oswego.cs.CardORamaBackend.model.flashcard.Flashcard;
 import edu.oswego.cs.CardORamaBackend.model.flashcard.FlashcardRepository;
 import edu.oswego.cs.CardORamaBackend.model.flashcardset.FlashcardSet;
+import edu.oswego.cs.CardORamaBackend.model.flashcardset.FlashcardSetPrivacy;
 import edu.oswego.cs.CardORamaBackend.model.flashcardset.FlashcardSetRepository;
 import edu.oswego.cs.CardORamaBackend.utils.DBUtils;
 import edu.oswego.cs.CardORamaBackend.utils.TFIDF;
@@ -39,6 +43,9 @@ public class StudySessionController {
    @Autowired
    FlashcardSetRepository flashcardSetRepository;
 
+   @Autowired
+   FavoritedFlashcardSetRepository favoritedFlashcardSetRepository;
+
    @PostMapping("/create")
    public ResponseEntity<List<StudySet>> createStudySession(@AuthenticationPrincipal OAuth2User principal, @RequestBody List<Long> flashcardSetIDs) {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -46,12 +53,15 @@ public class StudySessionController {
          List<Flashcard> flashcards = new ArrayList<>();
          HashMap<Long,String> flashcardColorMap = new HashMap<>();
          // get all of the flashcards
-         for (Long flashcardSetID : flashcardSetIDs) {
-            if(DBUtils.userHasWriteAccessForFlashcardSet(principal.getAttribute("email"), flashcardSetID)) {
-               Optional<FlashcardSet> flashcardSet = this.flashcardSetRepository.findById(flashcardSetID);
-               String color = flashcardSet.isPresent() ? flashcardSet.get().getColor() : "FFFFFF";
-               flashcardColorMap.put(flashcardSetID, color);
-               flashcards.addAll(this.flashcardRepository.findBySetID(flashcardSetID));
+         Iterable<FlashcardSet> flashcardSets = this.flashcardSetRepository.findAllById(flashcardSetIDs);
+         for (FlashcardSet flashcardSet : flashcardSets) {
+            Optional<FavoritedFlashcardSet> favOptional = this.favoritedFlashcardSetRepository.findById(new FavoritedFlashcardSetID(principal.getAttribute("email"), flashcardSet.getSetID()));
+            if(DBUtils.userHasWriteAccessForFlashcardSet(principal.getAttribute("email"), flashcardSet.getSetID())
+               || flashcardSet.getPrivacy() == FlashcardSetPrivacy.PUBLIC
+               || favOptional.isPresent()) {
+               String color = flashcardSet.getColor();
+               flashcardColorMap.put(flashcardSet.getSetID(), color);
+               flashcards.addAll(this.flashcardRepository.findBySetID(flashcardSet.getSetID()));
             }
          }
 
