@@ -5,6 +5,7 @@
    import { overrideItemIdKeyNameBeforeInitialisingDndZones } from "svelte-dnd-action";
    import { dndzone } from "svelte-dnd-action";
 	import Layout from "../+layout.svelte";
+	import { goto } from "$app/navigation";
    overrideItemIdKeyNameBeforeInitialisingDndZones("flashcardID");
    
    let globals = new GlobalReferences();
@@ -137,10 +138,10 @@
                flashcards = await getAllFlashCards.json();
             }
          } else {
-            window.location.href = globals.indexlocation;
+            goto("/");
          }
       } catch (exception)  {
-         window.location.href = globals.indexlocation;
+         goto("/");
       }
    });
 
