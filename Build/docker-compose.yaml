@@ -1,0 +1,68 @@
+version: '3.8'
+services:
+
+   card-o-rama-db:
+      image: mysql:latest
+      network_mode: host 
+      container_name: card-o-rama-db
+      environment:
+         - MYSQL_ROOT_PASSWORD=${ROOT_PASSWORD}
+         - MYSQL_USER=${DB_USERNAME}
+         - MYSQL_PASSWORD=${USER_PASSWORD}
+         - MYSQL_DATABASE=${DATABASE_NAME}
+         - MYSQL_TCP_PORT=${MYSQL_PORT}
+      volumes:
+         - "./createCardORamaDB.sql:/docker-entrypoint-initdb.d/1.sql"
+ 
+   card-o-rama-backend:
+      build:
+         context: ./
+         dockerfile: Backend.Dockerfile
+      image: card-o-rama-backend
+      network_mode: host
+      container_name: card-o-rama-backend
+      depends_on:
+         - card-o-rama-db
+      environment:
+         - SPRING_DATASOURCE_URL=jdbc:mysql://localhost:${MYSQL_PORT}/CardORama
+         - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+         - SPRING_DATASOURCE_PASSWORD=${USER_PASSWORD}
+         - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+         - SERVER_PORT=${BACKEND_PORT}
+         - REVERSE_PROXY_PORT=${REVERSE_PROXY_PORT}
+         - REVERSE_PROXY_DOMAIN=${REVERSE_PROXY_DOMAIN}
+      ports:
+         - "${BACKEND_PORT}:${BACKEND_PORT}"
+
+   card-o-rama-frontend:
+      build:
+         context: ../Card-O-Rama-Frontend/
+         dockerfile: Frontend.Dockerfile
+         args:
+            - FRONTEND_PORT=${FRONTEND_PORT}
+      image: card-o-rama-frontend
+      network_mode: host  
+      container_name: card-o-rama-frontend
+      environment:
+         - FRONTEND_PORT=${FRONTEND_PORT}
+         - BACKEND_PORT=${BACKEND_PORT}
+         - PUBLIC_REVERSE_PROXY_PORT=${REVERSE_PROXY_PORT}
+      ports:
+         - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+
+
+   card-o-rama-reverse-proxy:
+      build:
+         context: ./
+         dockerfile: ReverseProxy.Dockerfile
+      image: card-o-rama-reverse-proxy
+      network_mode: host  
+      container_name: card-o-rama-reverse-proxy
+      environment:
+         - REVERSE_PROXY_PORT=${REVERSE_PROXY_PORT}
+         - FRONTEND_PORT=${FRONTEND_PORT}
+         - BACKEND_PORT=${BACKEND_PORT}
+         - FRONTEND_HOST=${REVERSE_PROXY_DOMAIN}
+         - BACKEND_HOST=${REVERSE_PROXY_DOMAIN}
+      ports:
+         - "${REVERSE_PROXY_PORT}:${REVERSE_PROXY_PORT}"
