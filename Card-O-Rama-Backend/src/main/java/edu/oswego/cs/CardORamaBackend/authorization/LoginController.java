@@ -1,6 +1,7 @@
 package edu.oswego.cs.CardORamaBackend.authorization;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,11 +19,17 @@ public class LoginController {
    @Autowired
    private UserRepository userRepository;
 
+   @Value("${reverse.proxy.port}")
+   private String reverseProxyPort;
+
+   @Value("${reverse.proxy.domain}")
+   private String reverseProxyDomain;
+
    @RequestMapping("/")
    public void loginRedirect(HttpServletResponse httpServletResponse, @AuthenticationPrincipal OAuth2User principal) {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       if (auth.isAuthenticated()) {
-         httpServletResponse.setHeader("Location", "http://localhost:8080/home");
+         httpServletResponse.setHeader("Location", "http://" + reverseProxyDomain + ":" + reverseProxyPort + "/home");
          httpServletResponse.setStatus(302);
          String email = principal.getAttribute("email");
          String name = principal.getAttribute("name");
