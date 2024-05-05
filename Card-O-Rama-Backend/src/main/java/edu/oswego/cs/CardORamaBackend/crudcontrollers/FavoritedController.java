@@ -25,7 +25,7 @@ import edu.oswego.cs.CardORamaBackend.model.friend.Friend;
 import edu.oswego.cs.CardORamaBackend.model.friend.FriendID;
 import edu.oswego.cs.CardORamaBackend.model.friend.FriendRepository;
 
-@CrossOrigin(origins = "http://localhost:8080")
+@CrossOrigin(origins = "http://localhost:26910")
 @RestController
 @RequestMapping("/Favorite")
 public class FavoritedController {

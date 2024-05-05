@@ -34,7 +34,7 @@ import edu.oswego.cs.CardORamaBackend.model.flashcardset.FlashcardSet;
 import edu.oswego.cs.CardORamaBackend.model.flashcardset.FlashcardSetPrivacy;
 import edu.oswego.cs.CardORamaBackend.model.flashcardset.FlashcardSetRepository;
 
-@CrossOrigin(origins = "http://localhost:8080")
+@CrossOrigin(origins = "http://localhost:26910")
 @RestController
 @RequestMapping("/GoogleDrive")
 public class GoogleDriveController {

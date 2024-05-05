@@ -13,7 +13,7 @@ import com.google.api.client.http.HttpStatusCodes;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 
-@CrossOrigin(origins = "http://localhost:8080")
+@CrossOrigin(origins = "http://localhost:26910")
 @RestController
 @RequestMapping("/OAuthUtil")
 public class OAuthController {

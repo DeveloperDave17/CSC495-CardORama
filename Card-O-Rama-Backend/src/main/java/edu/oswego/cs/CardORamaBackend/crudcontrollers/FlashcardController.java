@@ -32,7 +32,7 @@ import edu.oswego.cs.CardORamaBackend.services.FlashcardService;
 import edu.oswego.cs.CardORamaBackend.utils.DBUtils;
 import jakarta.servlet.http.HttpServletResponse;
 
-@CrossOrigin(origins = "http://localhost:8080")
+@CrossOrigin(origins = "http://localhost:26910")
 @RestController
 @RequestMapping("/Flashcard")
 public class FlashcardController {

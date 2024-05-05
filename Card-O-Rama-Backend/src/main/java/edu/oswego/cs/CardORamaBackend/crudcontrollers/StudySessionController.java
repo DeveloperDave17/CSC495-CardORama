@@ -32,7 +32,7 @@ import edu.oswego.cs.CardORamaBackend.model.flashcardset.FlashcardSetRepository;
 import edu.oswego.cs.CardORamaBackend.utils.DBUtils;
 import edu.oswego.cs.CardORamaBackend.utils.TFIDF;
 
-@CrossOrigin(origins = "http://localhost:8080")
+@CrossOrigin(origins = "http://localhost:26910")
 @RestController
 @RequestMapping("/StudySession")
 public class StudySessionController {

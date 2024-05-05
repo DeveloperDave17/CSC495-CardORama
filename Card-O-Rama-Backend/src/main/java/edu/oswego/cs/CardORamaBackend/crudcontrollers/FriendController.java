@@ -24,7 +24,7 @@ import edu.oswego.cs.CardORamaBackend.model.friendRequest.FriendRequestRepositor
 import edu.oswego.cs.CardORamaBackend.services.FriendService;
 import jakarta.servlet.http.HttpServletResponse;
 
-@CrossOrigin(origins = "http://localhost:8080")
+@CrossOrigin(origins = "http://localhost:26910")
 @RestController
 @RequestMapping("/Friend")
 public class FriendController {
