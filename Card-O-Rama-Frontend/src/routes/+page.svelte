@@ -1,3 +1,7 @@
+<script>
+   import { PUBLIC_REVERSE_PROXY_PORT } from "$env/static/public";
+</script>
+
 <div id="page">
    <div id="nav-bar"></div>
    <div class="info-container">
@@ -5,7 +9,7 @@
       <p>
          Card-O-Rama is a flashcard based studying website that empowers connection making through a tf-idf similarity algorithm.
       </p>
-      <a href="http://localhost:8080/oauth2/authorization/google"><img id="sign-in-img" src="/images/web_light_sq_SI.svg" alt="Google Sign-in"></a>
+      <a href="http://localhost:{PUBLIC_REVERSE_PROXY_PORT}/oauth2/authorization/google"><img id="sign-in-img" src="/images/web_light_sq_SI.svg" alt="Google Sign-in"></a>
       <img id="homepage-img" src="/images/book-open-page-variant.svg" alt="open book">
    </div>
    <div id="footer">Created By David Hennigan</div>
