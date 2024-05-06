@@ -1,13 +1,9 @@
-hostname: localhost
-reverse-proxy-port: 8080
-svelte-port: 5173
-backend-port: 8082
 backend-api-prefix: /api
 backend-auth-prefix: /oauth2
 backend-login-prefix: /login
 
 server:
-   port: ${reverse-proxy-port}
+   port: ${reverse.proxy.port}  
 
 spring:
    cloud:
@@ -16,23 +12,23 @@ spring:
          - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
          routes:
          - id: svelte-app
-           uri: http://${hostname}:${svelte-port}
+           uri: http://${frontend.host}:${frontend.port}
            predicates:
-           - Path=/, /home/**, /images/**, /node_modules/**, /@fs/**, /@vite/**, /.svelte-kit/**, /@id/**, /src/**
+           - Path=/, /home/**, /images/**, /node_modules/**, /@fs/**, /@vite/**, /.svelte-kit/**, /@id/**, /src/**, /_app/**
          
          - id: spring-boot-backend-api
-           uri: http://${hostname}:${backend-port}
+           uri: http://${backend.host}:${backend.port}
            predicates:
            - Path=${backend-api-prefix}/**
            filters:
            - StripPrefix=1
 
          - id: spring-boot-login-api
-           uri: http://${hostname}:${backend-port}/${backend-login-prefix}
+           uri: http://${backend.host}:${backend.port}/${backend-login-prefix}
            predicates:
            - Path=${backend-login-prefix}/**
 
          - id: spring-boot-auth-api
-           uri: http://${hostname}:${backend-port}/${backend-auth-prefix}
+           uri: http://${backend.host}:${backend.port}/${backend-auth-prefix}
            predicates:
            - Path=${backend-auth-prefix}/**
