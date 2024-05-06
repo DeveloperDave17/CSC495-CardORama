@@ -45,4 +45,4 @@ together. Card-O-Rama's customizability allows users to differentiate flashcard 
 * Spring Cloud Gateway
 
 ## Build Instructions
-
+If on a Linux or Mac device navigate to the Build directory and execute rebuild.sh
