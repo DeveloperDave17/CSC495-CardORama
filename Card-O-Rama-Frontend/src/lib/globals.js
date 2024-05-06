@@ -1,5 +1,8 @@
-const frontendPort = 8080;
-const backendPort = 8080;
+import { PUBLIC_REVERSE_PROXY_PORT } from "$env/static/public";
+import { PUBLIC_BACKEND_PORT } from "$env/static/public";
+
+const frontendPort = PUBLIC_REVERSE_PROXY_PORT;
+const backendPort = PUBLIC_REVERSE_PROXY_PORT;
 
 export class GlobalReferences {
    constructor() {
